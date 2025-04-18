@@ -91,6 +91,15 @@ export default function Header() {
               My Fortunes
             </a>
           </li>
+          <li className="pt-2 border-t border-purple-800 mt-2">
+            <Link 
+              href="/premium" 
+              className="flex items-center justify-center py-2 font-['Cinzel'] bg-gradient-to-r from-amber-500 to-amber-600 text-purple-950 rounded-md hover:from-amber-400 hover:to-amber-500 transition-colors"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              <FontAwesomeIcon icon={faCrown} className="mr-2" /> Go Premium
+            </Link>
+          </li>
         </ul>
       </motion.div>
     </header>

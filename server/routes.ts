@@ -1,6 +1,7 @@
 import { Router } from "express";
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import Stripe from "stripe";
 import { storage } from "./storage";
 import { 
   insertFortuneSchema, 
@@ -10,6 +11,15 @@ import {
   ZodiacSigns
 } from "@shared/schema";
 import { z } from "zod";
+
+// Initialize Stripe if secret key is available
+if (!process.env.STRIPE_SECRET_KEY) {
+  console.warn('Missing STRIPE_SECRET_KEY environment variable. Stripe features will be disabled.');
+}
+
+const stripe = process.env.STRIPE_SECRET_KEY 
+  ? new Stripe(process.env.STRIPE_SECRET_KEY)
+  : null;
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const router = Router();
@@ -164,6 +174,129 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to get horoscope" });
     }
   });
+
+  // Stripe payment routes
+  if (stripe) {
+    // Create payment intent for one-time payments
+    router.post("/create-payment-intent", async (req, res) => {
+      try {
+        const schema = z.object({
+          amount: z.number().positive(),
+          plan: z.enum(['monthly', 'annual']).optional()
+        });
+
+        const validationResult = schema.safeParse(req.body);
+        
+        if (!validationResult.success) {
+          return res.status(400).json({ 
+            message: "Invalid payment data", 
+            errors: validationResult.error.errors 
+          });
+        }
+        
+        const { amount, plan } = validationResult.data;
+        
+        const paymentIntent = await stripe.paymentIntents.create({
+          amount: Math.round(amount * 100), // Convert to cents
+          currency: "usd",
+          metadata: {
+            plan: plan || 'one-time'
+          }
+        });
+        
+        res.json({ 
+          clientSecret: paymentIntent.client_secret,
+          amount: amount,
+          plan: plan || 'one-time'
+        });
+      } catch (error: any) {
+        console.error("Error creating payment intent:", error);
+        res.status(500).json({ 
+          message: "Payment processing error: " + error.message 
+        });
+      }
+    });
+
+    // Create subscription
+    router.post("/create-subscription", async (req, res) => {
+      try {
+        const schema = z.object({
+          email: z.string().email(),
+          paymentMethodId: z.string(),
+          plan: z.enum(['monthly', 'annual'])
+        });
+
+        const validationResult = schema.safeParse(req.body);
+        
+        if (!validationResult.success) {
+          return res.status(400).json({ 
+            message: "Invalid subscription data", 
+            errors: validationResult.error.errors 
+          });
+        }
+        
+        const { email, paymentMethodId, plan } = validationResult.data;
+        
+        // This would typically come from an environment variable or database
+        const priceId = plan === 'monthly' 
+          ? process.env.STRIPE_MONTHLY_PRICE_ID || 'price_monthly_placeholder'
+          : process.env.STRIPE_ANNUAL_PRICE_ID || 'price_annual_placeholder';
+        
+        // Create or retrieve customer
+        let customer;
+        const customers = await stripe.customers.list({ email });
+        
+        if (customers.data.length > 0) {
+          customer = customers.data[0];
+        } else {
+          customer = await stripe.customers.create({ email });
+        }
+        
+        // Attach payment method to customer
+        await stripe.paymentMethods.attach(paymentMethodId, {
+          customer: customer.id,
+        });
+        
+        // Set as default payment method
+        await stripe.customers.update(customer.id, {
+          invoice_settings: {
+            default_payment_method: paymentMethodId,
+          },
+        });
+        
+        // Create subscription
+        const subscription = await stripe.subscriptions.create({
+          customer: customer.id,
+          items: [{ price: priceId }],
+          expand: ["latest_invoice.payment_intent"],
+        });
+        
+        res.json({ 
+          subscriptionId: subscription.id,
+          clientSecret: (subscription.latest_invoice as any)?.payment_intent?.client_secret,
+          status: subscription.status
+        });
+      } catch (error: any) {
+        console.error("Error creating subscription:", error);
+        res.status(500).json({ 
+          message: "Subscription processing error: " + error.message 
+        });
+      }
+    });
+  } else {
+    // Mock Stripe routes if Stripe is not configured
+    router.post("/create-payment-intent", (req, res) => {
+      res.status(503).json({ 
+        message: "Payment processing is not available. STRIPE_SECRET_KEY is missing." 
+      });
+    });
+    
+    router.post("/create-subscription", (req, res) => {
+      res.status(503).json({ 
+        message: "Subscription processing is not available. STRIPE_SECRET_KEY is missing." 
+      });
+    });
+  }
 
   const httpServer = createServer(app);
   return httpServer;
