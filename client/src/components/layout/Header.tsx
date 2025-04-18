@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMoon, faBars } from "@fortawesome/free-solid-svg-icons";
+import { faMoon, faBars, faCrown } from "@fortawesome/free-solid-svg-icons";
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -34,6 +34,11 @@ export default function Header() {
             </li>
             <li>
               <a href="#favorites" className="font-['Cinzel'] text-sm hover:text-amber-500 transition-colors">My Fortunes</a>
+            </li>
+            <li>
+              <Link href="/premium" className="flex items-center font-['Cinzel'] text-sm bg-gradient-to-r from-amber-500 to-amber-600 text-purple-950 px-3 py-1 rounded-full hover:from-amber-400 hover:to-amber-500 transition-colors">
+                <FontAwesomeIcon icon={faCrown} className="mr-1 text-xs" /> Premium
+              </Link>
             </li>
           </ul>
         </nav>

@@ -6,12 +6,14 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
+import Premium from "@/pages/premium";
 import FontLoader from "@/lib/fontLoader";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/premium" component={Premium} />
       <Route component={NotFound} />
     </Switch>
   );
