@@ -7,26 +7,42 @@ import { Spinner } from "@/components/ui/spinner";
 import { getZodiacDateRange, getStarRating, capitalizeFirstLetter } from "@/lib/utils";
 import { fadeIn } from "@/lib/animations";
 import { ZodiacSignType } from "@shared/schema";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { 
+  faFire, 
+  faLeaf, 
+  faWind, 
+  faWater, 
+  faSun, 
+  faSeedling,
+  faBalanceScale,
+  faDragon,
+  faHorse,
+  faMountain,
+  faTintSlash,
+  faFish,
+  faStar
+} from "@fortawesome/free-solid-svg-icons";
 
 // Icons for zodiac signs
-const zodiacIcons: Record<ZodiacSignType, string> = {
-  aries: "fa-fire",
-  taurus: "fa-leaf",
-  gemini: "fa-wind",
-  cancer: "fa-water",
-  leo: "fa-sun",
-  virgo: "fa-seedling",
-  libra: "fa-balance-scale",
-  scorpio: "fa-dragon",
-  sagittarius: "fa-horse",
-  capricorn: "fa-mountain",
-  aquarius: "fa-tint-slash",
-  pisces: "fa-fish"
+const zodiacIcons: Record<ZodiacSignType, any> = {
+  aries: faFire,
+  taurus: faLeaf,
+  gemini: faWind,
+  cancer: faWater,
+  leo: faSun,
+  virgo: faSeedling,
+  libra: faBalanceScale,
+  scorpio: faDragon,
+  sagittarius: faHorse,
+  capricorn: faMountain,
+  aquarius: faTintSlash,
+  pisces: faFish
 };
 
 const ZodiacButton = ({ sign, icon, isSelected, onClick }: { 
   sign: ZodiacSignType, 
-  icon: string, 
+  icon: any, 
   isSelected: boolean, 
   onClick: () => void 
 }) => {
@@ -38,7 +54,7 @@ const ZodiacButton = ({ sign, icon, isSelected, onClick }: {
       }`}
       onClick={onClick}
     >
-      <i className={`fas ${icon} text-amber-500`}></i>
+      <FontAwesomeIcon icon={icon} className="text-amber-500" />
     </Button>
   );
 };
@@ -51,10 +67,10 @@ const StarRating = ({ rating, label }: { rating: number, label: string }) => {
       <div className="text-amber-500 text-xs mb-1">{label}</div>
       <div className="flex justify-center">
         {[...Array(stars.filled)].map((_, i) => (
-          <i key={`filled-${i}`} className="fas fa-star text-amber-500"></i>
+          <FontAwesomeIcon key={`filled-${i}`} icon={faStar} className="text-amber-500" />
         ))}
         {[...Array(stars.empty)].map((_, i) => (
-          <i key={`empty-${i}`} className="fas fa-star text-white/30"></i>
+          <FontAwesomeIcon key={`empty-${i}`} icon={faStar} className="text-white/30" />
         ))}
       </div>
     </div>

@@ -7,11 +7,18 @@ import { Spinner } from "@/components/ui/spinner";
 import { formatDate } from "@/lib/utils";
 import { fadeIn } from "@/lib/animations";
 import { FortuneCategoryType } from "@shared/schema";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { 
+  faHeart, 
+  faBriefcase, 
+  faStar,
+  faArrowRight
+} from "@fortawesome/free-solid-svg-icons";
 
-const categoryIcons: Record<FortuneCategoryType, string> = {
-  love: "fa-heart text-rose-500",
-  career: "fa-briefcase text-teal-500",
-  general: "fa-star text-amber-500"
+const categoryIcons: Record<FortuneCategoryType, any> = {
+  love: { icon: faHeart, className: "text-rose-500" },
+  career: { icon: faBriefcase, className: "text-teal-500" },
+  general: { icon: faStar, className: "text-amber-500" }
 };
 
 export default function SavedFortunes() {
@@ -86,7 +93,10 @@ export default function SavedFortunes() {
                         <div className="flex justify-between items-start">
                           <div>
                             <div className="flex items-center">
-                              <i className={`fas ${categoryIcons[fortune.category as FortuneCategoryType]} mr-2`}></i>
+                              <FontAwesomeIcon 
+                                icon={categoryIcons[fortune.category as FortuneCategoryType].icon} 
+                                className={`${categoryIcons[fortune.category as FortuneCategoryType].className} mr-2`} 
+                              />
                               <h4 className="font-['Cinzel'] text-lg text-amber-500">{fortune.fortuneTitle}</h4>
                             </div>
                             <p className="mt-2 text-sm">{fortune.fortuneContent}</p>

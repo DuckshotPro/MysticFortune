@@ -3,6 +3,8 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { tarotCards } from "@/lib/data";
 import { flipCard, fadeIn } from "@/lib/animations";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faQuestion, faRedoAlt } from "@fortawesome/free-solid-svg-icons";
 
 type CardReadingType = "three-card" | "single-card" | "celtic-cross";
 
@@ -40,7 +42,10 @@ const TarotCard = ({ position, description, card }: TarotCardProps) => {
           
           <div className="flex justify-center items-center flex-grow">
             <div className="w-20 h-32 border border-amber-500 rounded-md flex items-center justify-center">
-              <i className="fas fa-question text-4xl text-amber-500 opacity-50"></i>
+              <FontAwesomeIcon 
+                icon={faQuestion} 
+                className="text-4xl text-amber-500 opacity-50" 
+              />
             </div>
           </div>
           
@@ -160,7 +165,7 @@ export default function FortuneCards() {
             className="bg-amber-500 text-purple-950 hover:bg-amber-500/90 px-8 py-6 rounded-full font-['Cinzel'] shadow-lg transition-all transform hover:scale-105"
             onClick={handleShuffle}
           >
-            <i className="fas fa-redo-alt mr-2"></i> Shuffle & Draw New Cards
+            <FontAwesomeIcon icon={faRedoAlt} className="mr-2" /> Shuffle & Draw New Cards
           </Button>
         </div>
       </div>
