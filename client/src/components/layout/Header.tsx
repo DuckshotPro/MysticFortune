@@ -1,0 +1,88 @@
+import { useState } from "react";
+import { Link } from "wouter";
+import { motion } from "framer-motion";
+
+export default function Header() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+  
+  return (
+    <header className="bg-gradient-to-r from-purple-950 to-purple-900 shadow-lg sticky top-0 z-50">
+      <div className="container mx-auto px-4 py-2 flex justify-between items-center">
+        <Link href="/">
+          <div className="flex items-center cursor-pointer">
+            <i className="fas fa-moon text-amber-500 text-2xl mr-2 filter drop-shadow-[0_0_8px_rgba(212,175,55,0.6)]"></i>
+            <h1 className="font-['Cinzel'] text-xl sm:text-2xl md:text-3xl text-amber-500">Mystic Fortune</h1>
+          </div>
+        </Link>
+        
+        <nav className="hidden md:block">
+          <ul className="flex items-center space-x-6">
+            <li>
+              <a href="#fortune-teller" className="font-['Cinzel'] text-sm hover:text-amber-500 transition-colors">Fortune Teller</a>
+            </li>
+            <li>
+              <a href="#daily-horoscope" className="font-['Cinzel'] text-sm hover:text-amber-500 transition-colors">Daily Horoscope</a>
+            </li>
+            <li>
+              <a href="#favorites" className="font-['Cinzel'] text-sm hover:text-amber-500 transition-colors">My Fortunes</a>
+            </li>
+          </ul>
+        </nav>
+        
+        <button 
+          className="text-white md:hidden" 
+          onClick={toggleMobileMenu}
+          aria-label="Toggle menu"
+        >
+          <i className="fas fa-bars text-xl"></i>
+        </button>
+      </div>
+      
+      {/* Mobile Navigation Menu */}
+      <motion.div 
+        id="mobile-menu" 
+        className={`md:hidden bg-purple-950 ${isMobileMenuOpen ? 'block' : 'hidden'}`}
+        initial={{ height: 0, opacity: 0 }}
+        animate={{ 
+          height: isMobileMenuOpen ? 'auto' : 0,
+          opacity: isMobileMenuOpen ? 1 : 0
+        }}
+        transition={{ duration: 0.3 }}
+      >
+        <ul className="px-4 py-2 space-y-3">
+          <li>
+            <a 
+              href="#fortune-teller" 
+              className="block py-2 font-['Cinzel'] hover:text-amber-500 transition-colors"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Fortune Teller
+            </a>
+          </li>
+          <li>
+            <a 
+              href="#daily-horoscope" 
+              className="block py-2 font-['Cinzel'] hover:text-amber-500 transition-colors"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Daily Horoscope
+            </a>
+          </li>
+          <li>
+            <a 
+              href="#favorites" 
+              className="block py-2 font-['Cinzel'] hover:text-amber-500 transition-colors"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              My Fortunes
+            </a>
+          </li>
+        </ul>
+      </motion.div>
+    </header>
+  );
+}
