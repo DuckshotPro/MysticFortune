@@ -5,19 +5,19 @@ import { Button } from "@/components/ui/button";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCrown, faCheck } from "@fortawesome/free-solid-svg-icons";
+import { faCrown, faCheck, faTimes } from "@fortawesome/free-solid-svg-icons";
+import { CheckoutForm } from "@/components/monetization/CheckoutForm";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 export default function Premium() {
   const [selectedPlan, setSelectedPlan] = useState<"monthly" | "annual">("annual");
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [isPurchaseComplete, setIsPurchaseComplete] = useState(false);
   const { toast } = useToast();
   
   const handleSubscribe = (plan: "monthly" | "annual") => {
-    // In a real app, this would redirect to Stripe checkout
-    toast({
-      title: "Premium Subscription Coming Soon!",
-      description: "We're setting up our payment system. Please check back later.",
-      variant: "default",
-    });
+    setSelectedPlan(plan);
+    setIsCheckoutOpen(true);
   };
   
   return (
@@ -161,6 +161,26 @@ export default function Premium() {
         </div>
       </main>
       <Footer />
+
+      {/* Checkout Dialog */}
+      <Dialog open={isCheckoutOpen} onOpenChange={setIsCheckoutOpen}>
+        <DialogContent className="sm:max-w-md bg-gradient-to-b from-purple-900 to-purple-950 border-purple-700">
+          <CheckoutForm 
+            amount={selectedPlan === 'monthly' ? 9.99 : 95.88}
+            planType={selectedPlan}
+            onSuccess={() => {
+              setIsCheckoutOpen(false);
+              setIsPurchaseComplete(true);
+              toast({
+                title: "Premium Activated!",
+                description: "You now have access to all premium features.",
+                variant: "default",
+              });
+            }}
+            onCancel={() => setIsCheckoutOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

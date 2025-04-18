@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { tarotCards } from "@/lib/data";
 import { flipCard, fadeIn } from "@/lib/animations";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faQuestion, faRedoAlt } from "@fortawesome/free-solid-svg-icons";
+import { faQuestion, faRedoAlt, faBook, faStar, faChartLine } from "@fortawesome/free-solid-svg-icons";
+import { PremiumFeature } from "@/components/monetization/PremiumFeature";
 
 type CardReadingType = "three-card" | "single-card" | "celtic-cross";
 
@@ -167,6 +168,35 @@ export default function FortuneCards() {
           >
             <FontAwesomeIcon icon={faRedoAlt} className="mr-2" /> Shuffle & Draw New Cards
           </Button>
+        </div>
+
+        {/* Premium Features Section */}
+        <div className="mt-16 border-t border-purple-800 pt-12">
+          <h3 className="font-['Cinzel'] text-2xl text-center mb-8 text-amber-500">
+            Advanced Tarot Insights
+          </h3>
+          <div className="grid md:grid-cols-3 gap-6">
+            <PremiumFeature
+              title="Expert Card Analysis"
+              description="Get detailed interpretations of your tarot spread from professional readers. Understand the nuanced meanings beyond basic readings."
+              icon={<FontAwesomeIcon icon={faBook} />}
+              isPremium={false}
+            />
+            
+            <PremiumFeature
+              title="Relationship Compatibility"
+              description="Discover how your cards relate to your romantic relationships. Get insights on compatibility, challenges, and opportunities."
+              icon={<FontAwesomeIcon icon={faStar} />}
+              isPremium={false}
+            />
+            
+            <PremiumFeature
+              title="Year Ahead Forecast"
+              description="Explore a comprehensive 12-month forecast with monthly predictions based on your unique energetic signature."
+              icon={<FontAwesomeIcon icon={faChartLine} />}
+              isPremium={false}
+            />
+          </div>
         </div>
       </div>
     </section>
