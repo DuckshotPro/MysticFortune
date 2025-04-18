@@ -14,10 +14,10 @@ interface AdBannerProps {
 export function AdBanner({ variant = "footer", showCloseButton = true }: AdBannerProps) {
   const [isVisible, setIsVisible] = useState(true);
   const { toast } = useToast();
-  const [, setLocation] = useLocation();
+  const [, navigate] = useLocation();
 
   const handlePremiumClick = () => {
-    setLocation("/premium");
+    navigate("/premium");
   };
 
   if (!isVisible) return null;

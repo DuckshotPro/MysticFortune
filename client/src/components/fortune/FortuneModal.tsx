@@ -239,7 +239,7 @@ export function FortuneModal({ fortune, onClose, onSave }: FortuneModalProps) {
           </div>
           
           {/* Social Share Options */}
-          {showShareOptions && (
+          {showShareOptions && !showVisualPreview && (
             <motion.div 
               initial={{ opacity: 0, y: -10 }} 
               animate={{ opacity: 1, y: 0 }}
@@ -318,6 +318,62 @@ export function FortuneModal({ fortune, onClose, onSave }: FortuneModalProps) {
                 <FontAwesomeIcon icon={faCopy} className="mr-2" /> 
                 Copy to Clipboard
               </Button>
+            </motion.div>
+          )}
+          
+          {/* Visual Preview for sharing */}
+          {showVisualPreview && (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }} 
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-purple-900 rounded-lg p-4 mb-4 border border-amber-500/30 shadow-lg"
+            >
+              <div className="flex justify-between items-center mb-3">
+                <h4 className="text-amber-400 font-semibold">Share Your Fortune</h4>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-white/70 hover:text-white"
+                  onClick={() => setShowVisualPreview(false)}
+                >
+                  <FontAwesomeIcon icon={faTimes} />
+                </Button>
+              </div>
+              
+              {/* Fortune Image Preview */}
+              <div className="mb-3 border border-amber-500/20 rounded-lg overflow-hidden shadow-lg">
+                <img 
+                  src={shareVisualUrl} 
+                  alt={`${fortune.title} Fortune Card`} 
+                  className="w-full h-auto"
+                />
+              </div>
+              
+              {/* Preview of the engaging text snippet */}
+              <div className="mb-3 bg-purple-950/50 p-3 rounded text-sm text-white/90 max-h-24 overflow-y-auto">
+                <p>{shareSnippet.replace('{platform}', selectedPlatform || 'social')}</p>
+                <p className="mt-2 text-amber-400 font-semibold">{selectedPlatform && generateCallToAction(selectedPlatform)}</p>
+              </div>
+              
+              <div className="flex gap-2">
+                <Button 
+                  variant="default"
+                  size="sm"
+                  className="flex-1 bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-purple-950"
+                  onClick={handleConfirmVisualShare}
+                >
+                  <FontAwesomeIcon icon={selectedPlatform === 'pinterest' ? faPinterest : faShareAlt} className="mr-2" />
+                  Share to {selectedPlatform}
+                </Button>
+                <Button 
+                  variant="outline"
+                  size="sm"
+                  className="border-amber-500/50 text-amber-400 hover:text-amber-300"
+                  onClick={() => setShowVisualPreview(false)}
+                >
+                  Choose Another Platform
+                </Button>
+              </div>
             </motion.div>
           )}
           
