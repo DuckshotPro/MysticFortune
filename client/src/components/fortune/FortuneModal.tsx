@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
@@ -13,8 +13,19 @@ import {
   faTimes, 
   faBookmark,
   faShareAlt,
-  faCrown
+  faCrown,
+  faCopy,
+  faImage
 } from "@fortawesome/free-solid-svg-icons";
+import { 
+  faFacebook, 
+  faTwitter, 
+  faSnapchat, 
+  faWhatsapp, 
+  faTelegram, 
+  faPinterest
+} from "@fortawesome/free-brands-svg-icons";
+import { generateFortuneBackground, generateFortuneSnippet, generateCallToAction } from "@/lib/fortuneVisuals";
 
 const categoryIcons: Record<FortuneCategoryType, any> = {
   love: faHeart,
@@ -31,24 +42,100 @@ interface FortuneModalProps {
 export function FortuneModal({ fortune, onClose, onSave }: FortuneModalProps) {
   const { toast } = useToast();
   const [showPremiumOffer, setShowPremiumOffer] = useState(false);
+  const [showShareOptions, setShowShareOptions] = useState(false);
+  const [showVisualPreview, setShowVisualPreview] = useState(false);
+  const [shareVisualUrl, setShareVisualUrl] = useState('');
+  const [shareSnippet, setShareSnippet] = useState('');
+  const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null);
   
-  const handleShare = () => {
-    // In a real app, this would open a share dialog or copy a unique link
-    navigator.clipboard.writeText(
-      `Check out my mystical fortune from Mystic Fortune: "${fortune.title}" - ${fortune.content}`
-    ).then(() => {
+  // Generate engaging fortune snippet and visual background
+  useEffect(() => {
+    // Create the visual background for sharing
+    const category = fortune.category as FortuneCategoryType;
+    const visualUrl = generateFortuneBackground(category, fortune.title);
+    setShareVisualUrl(visualUrl);
+    
+    // Generate the engaging text snippet
+    const snippet = generateFortuneSnippet(fortune.content, category);
+    setShareSnippet(snippet);
+  }, [fortune]);
+  
+  // Create dynamic share URLs with tracking and snippets
+  const getShareUrl = (platform: string) => {
+    // Replace the platform placeholder in the tracking URL
+    const trackingSnippet = shareSnippet.replace('{platform}', platform);
+    const encodedSnippet = encodeURIComponent(trackingSnippet);
+    
+    // Add call to action based on platform
+    const callToAction = generateCallToAction(platform);
+    const fullShareText = `${trackingSnippet}\n\n${callToAction}`;
+    const encodedFullShareText = encodeURIComponent(fullShareText);
+    
+    // Create platform-specific share URLs
+    const urls: Record<string, string> = {
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}&quote=${encodedFullShareText}`,
+      twitter: `https://twitter.com/intent/tweet?text=${encodedSnippet}`,
+      whatsapp: `https://wa.me/?text=${encodedFullShareText}`,
+      telegram: `https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodedFullShareText}`,
+      pinterest: `https://pinterest.com/pin/create/button/?url=${encodeURIComponent(window.location.href)}&media=${encodeURIComponent(shareVisualUrl)}&description=${encodedSnippet}`,
+      snapchat: `https://snapchat.com/scan?attachmentUrl=${encodeURIComponent(window.location.href)}`
+    };
+    
+    return urls[platform] || '';
+  };
+  
+  const handleShareToSocial = (platform: string) => {
+    setSelectedPlatform(platform);
+    
+    // Show visual preview for image-focused platforms like Pinterest
+    if (platform === 'pinterest') {
+      setShowVisualPreview(true);
+    } else {
+      // Open share dialog directly for text-focused platforms
+      window.open(getShareUrl(platform), '_blank', 'noopener,noreferrer,width=600,height=600');
+      
       toast({
-        title: "Fortune copied to clipboard!",
-        description: "Share your fortune with friends and family.",
+        title: `Sharing to ${platform}`,
+        description: generateCallToAction(platform),
         variant: "default",
       });
-    }).catch(err => {
-      toast({
-        title: "Couldn't copy fortune",
-        description: "Please try again later.",
-        variant: "destructive",
+    }
+  };
+  
+  const handleConfirmVisualShare = () => {
+    if (selectedPlatform) {
+      window.open(getShareUrl(selectedPlatform), '_blank', 'noopener,noreferrer,width=600,height=600');
+      setShowVisualPreview(false);
+    }
+  };
+  
+  const handleCopyToClipboard = () => {
+    // Use the engaging snippet with tracking for copy/paste sharing
+    navigator.clipboard.writeText(shareSnippet.replace('{platform}', 'clipboard'))
+      .then(() => {
+        toast({
+          title: "Fortune copied to clipboard!",
+          description: "Share your fortune with friends and family.",
+          variant: "default",
+        });
+        setShowShareOptions(false);
+      })
+      .catch(err => {
+        toast({
+          title: "Couldn't copy fortune",
+          description: "Please try again later.",
+          variant: "destructive",
+        });
       });
-    });
+  };
+  
+  const handleShare = () => {
+    setShowShareOptions(!showShareOptions);
+    
+    // Hide visual preview when closing share options
+    if (showShareOptions) {
+      setShowVisualPreview(false);
+    }
   };
   
   const handleUpgradeToPremium = () => {
@@ -144,12 +231,95 @@ export function FortuneModal({ fortune, onClose, onSave }: FortuneModalProps) {
             </Button>
             <Button 
               variant="ghost" 
-              className="text-teal-500 hover:text-teal-400 flex items-center"
+              className="text-teal-500 hover:text-teal-400 flex items-center relative"
               onClick={handleShare}
             >
               <FontAwesomeIcon icon={faShareAlt} className="mr-1" /> Share
             </Button>
           </div>
+          
+          {/* Social Share Options */}
+          {showShareOptions && (
+            <motion.div 
+              initial={{ opacity: 0, y: -10 }} 
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-purple-900 rounded-lg p-4 mb-4 border border-amber-500/30 shadow-lg"
+            >
+              <h4 className="text-amber-400 font-semibold mb-3">Share Your Fortune</h4>
+              
+              <div className="grid grid-cols-3 gap-3 mb-3">
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  className="flex flex-col items-center justify-center text-blue-500 hover:text-blue-400 h-auto py-2"
+                  onClick={() => handleShareToSocial('facebook')}
+                >
+                  <FontAwesomeIcon icon={faFacebook} className="text-xl mb-1" />
+                  <span className="text-xs">Facebook</span>
+                </Button>
+                
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  className="flex flex-col items-center justify-center text-sky-500 hover:text-sky-400 h-auto py-2"
+                  onClick={() => handleShareToSocial('twitter')}
+                >
+                  <FontAwesomeIcon icon={faTwitter} className="text-xl mb-1" />
+                  <span className="text-xs">Twitter</span>
+                </Button>
+                
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  className="flex flex-col items-center justify-center text-yellow-400 hover:text-yellow-300 h-auto py-2"
+                  onClick={() => handleShareToSocial('snapchat')}
+                >
+                  <FontAwesomeIcon icon={faSnapchat} className="text-xl mb-1" />
+                  <span className="text-xs">Snapchat</span>
+                </Button>
+                
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  className="flex flex-col items-center justify-center text-green-500 hover:text-green-400 h-auto py-2"
+                  onClick={() => handleShareToSocial('whatsapp')}
+                >
+                  <FontAwesomeIcon icon={faWhatsapp} className="text-xl mb-1" />
+                  <span className="text-xs">WhatsApp</span>
+                </Button>
+                
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  className="flex flex-col items-center justify-center text-cyan-500 hover:text-cyan-400 h-auto py-2"
+                  onClick={() => handleShareToSocial('telegram')}
+                >
+                  <FontAwesomeIcon icon={faTelegram} className="text-xl mb-1" />
+                  <span className="text-xs">Telegram</span>
+                </Button>
+                
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  className="flex flex-col items-center justify-center text-red-500 hover:text-red-400 h-auto py-2"
+                  onClick={() => handleShareToSocial('pinterest')}
+                >
+                  <FontAwesomeIcon icon={faPinterest} className="text-xl mb-1" />
+                  <span className="text-xs">Pinterest</span>
+                </Button>
+              </div>
+              
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="flex items-center justify-center w-full border-amber-500/50 text-amber-400 hover:text-amber-300"
+                onClick={handleCopyToClipboard}
+              >
+                <FontAwesomeIcon icon={faCopy} className="mr-2" /> 
+                Copy to Clipboard
+              </Button>
+            </motion.div>
+          )}
           
           <div className="text-xs text-white/60">
             <p>Fortune revealed on {formatDate(new Date())}</p>
