@@ -10,4 +10,5 @@ import { fas } from '@fortawesome/free-solid-svg-icons';
 // Add FontAwesome icons to the library
 library.add(fab, fas);
 
+// Mount the app
 createRoot(document.getElementById("root")!).render(<App />);

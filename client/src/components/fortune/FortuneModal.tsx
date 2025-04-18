@@ -3,11 +3,20 @@ import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
 import { Fortune, FortuneCategoryType } from "@shared/schema";
 import { modalVariants, backdropVariants } from "@/lib/animations";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { 
+  faHeart, 
+  faBriefcase, 
+  faStar, 
+  faTimes, 
+  faBookmark,
+  faShareAlt
+} from "@fortawesome/free-solid-svg-icons";
 
-const categoryIcons: Record<FortuneCategoryType, string> = {
-  love: "fa-heart",
-  career: "fa-briefcase",
-  general: "fa-star"
+const categoryIcons: Record<FortuneCategoryType, any> = {
+  love: faHeart,
+  career: faBriefcase,
+  general: faStar
 };
 
 interface FortuneModalProps {
@@ -36,13 +45,16 @@ export function FortuneModal({ fortune, onClose, onSave }: FortuneModalProps) {
             className="text-white hover:text-amber-500"
             onClick={onClose}
           >
-            <i className="fas fa-times"></i>
+            <FontAwesomeIcon icon={faTimes} />
           </Button>
         </div>
         
         <div className="text-center">
           <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center bg-purple-900">
-            <i className={`fas ${categoryIcons[fortune.category as FortuneCategoryType]} text-amber-500 text-2xl`}></i>
+            <FontAwesomeIcon 
+              icon={categoryIcons[fortune.category as FortuneCategoryType]} 
+              className="text-amber-500 text-2xl" 
+            />
           </div>
           
           <h3 className="font-['Cinzel'] text-2xl text-amber-500 mb-2">{fortune.title}</h3>
@@ -54,13 +66,13 @@ export function FortuneModal({ fortune, onClose, onSave }: FortuneModalProps) {
               className="text-teal-500 hover:text-teal-400 flex items-center"
               onClick={onSave}
             >
-              <i className="fas fa-bookmark mr-1"></i> Save
+              <FontAwesomeIcon icon={faBookmark} className="mr-1" /> Save
             </Button>
             <Button 
               variant="ghost" 
               className="text-teal-500 hover:text-teal-400 flex items-center"
             >
-              <i className="fas fa-share-alt mr-1"></i> Share
+              <FontAwesomeIcon icon={faShareAlt} className="mr-1" /> Share
             </Button>
           </div>
           

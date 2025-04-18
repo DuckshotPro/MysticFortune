@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMoon, faBars } from "@fortawesome/free-solid-svg-icons";
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -14,7 +16,10 @@ export default function Header() {
       <div className="container mx-auto px-4 py-2 flex justify-between items-center">
         <Link href="/">
           <div className="flex items-center cursor-pointer">
-            <i className="fas fa-moon text-amber-500 text-2xl mr-2 filter drop-shadow-[0_0_8px_rgba(212,175,55,0.6)]"></i>
+            <FontAwesomeIcon 
+              icon={faMoon} 
+              className="text-amber-500 text-2xl mr-2 filter drop-shadow-[0_0_8px_rgba(212,175,55,0.6)]" 
+            />
             <h1 className="font-['Cinzel'] text-xl sm:text-2xl md:text-3xl text-amber-500">Mystic Fortune</h1>
           </div>
         </Link>
@@ -38,7 +43,7 @@ export default function Header() {
           onClick={toggleMobileMenu}
           aria-label="Toggle menu"
         >
-          <i className="fas fa-bars text-xl"></i>
+          <FontAwesomeIcon icon={faBars} className="text-xl" />
         </button>
       </div>
       

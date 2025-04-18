@@ -7,12 +7,20 @@ import { FortuneModal } from "./FortuneModal";
 import { FortuneCategoryType, Fortune } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { Spinner } from "@/components/ui/spinner";
-import { fadeInUp, float, spin } from "@/lib/animations";
+import { float, spin } from "@/lib/animations";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { 
+  faHeart, 
+  faBriefcase, 
+  faStar, 
+  faHandSparkles, 
+  faMagic 
+} from "@fortawesome/free-solid-svg-icons";
 
 type CategoryButtonProps = {
   category: FortuneCategoryType;
   label: string;
-  icon: string;
+  icon: any;
   isSelected: boolean;
   onClick: () => void;
 };
@@ -28,7 +36,7 @@ const CategoryButton = ({ category, label, icon, isSelected, onClick }: Category
       }`}
       onClick={onClick}
     >
-      <i className={`fas ${icon} mb-1`}></i>
+      <FontAwesomeIcon icon={icon} className="mb-1" />
       <span className="block">{label}</span>
     </Button>
   );
@@ -108,8 +116,7 @@ export default function CrystalBall() {
                 {isLoading ? (
                   <Spinner className="text-amber-500" />
                 ) : (
-                  <motion.i 
-                    className="fas fa-hand-sparkles text-amber-500 text-2xl"
+                  <motion.div
                     animate={{ 
                       opacity: [0.5, 1, 0.5],
                       scale: [1, 1.1, 1] 
@@ -119,7 +126,9 @@ export default function CrystalBall() {
                       repeat: Infinity,
                       ease: "easeInOut" 
                     }}
-                  />
+                  >
+                    <FontAwesomeIcon icon={faHandSparkles} className="text-amber-500 text-2xl" />
+                  </motion.div>
                 )}
               </div>
             </motion.div>
@@ -136,21 +145,21 @@ export default function CrystalBall() {
                   <CategoryButton
                     category="love"
                     label="Love"
-                    icon="fa-heart"
+                    icon={faHeart}
                     isSelected={selectedCategory === "love"}
                     onClick={() => setSelectedCategory("love")}
                   />
                   <CategoryButton
                     category="career"
                     label="Career"
-                    icon="fa-briefcase"
+                    icon={faBriefcase}
                     isSelected={selectedCategory === "career"}
                     onClick={() => setSelectedCategory("career")}
                   />
                   <CategoryButton
                     category="general"
                     label="General"
-                    icon="fa-star"
+                    icon={faStar}
                     isSelected={selectedCategory === "general"}
                     onClick={() => setSelectedCategory("general")}
                   />
@@ -164,7 +173,7 @@ export default function CrystalBall() {
                   onClick={handleRevealFortune}
                   disabled={isLoading}
                 >
-                  <i className="fas fa-magic mr-2"></i> Reveal My Fortune
+                  <FontAwesomeIcon icon={faMagic} className="mr-2" /> Reveal My Fortune
                 </Button>
               </div>
             </CardContent>

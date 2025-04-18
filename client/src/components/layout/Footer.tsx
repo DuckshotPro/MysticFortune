@@ -1,4 +1,12 @@
 import { Link } from "wouter";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMoon } from "@fortawesome/free-solid-svg-icons";
+import { 
+  faInstagram, 
+  faTwitter, 
+  faFacebook, 
+  faTiktok 
+} from "@fortawesome/free-brands-svg-icons";
 
 export default function Footer() {
   return (
@@ -6,22 +14,25 @@ export default function Footer() {
       <div className="container mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-center">
           <div className="flex items-center mb-4 md:mb-0">
-            <i className="fas fa-moon text-amber-500 text-xl mr-2 filter drop-shadow-[0_0_8px_rgba(212,175,55,0.6)]"></i>
+            <FontAwesomeIcon 
+              icon={faMoon} 
+              className="text-amber-500 text-xl mr-2 filter drop-shadow-[0_0_8px_rgba(212,175,55,0.6)]" 
+            />
             <h3 className="font-['Cinzel'] text-xl text-amber-500">Mystic Fortune</h3>
           </div>
           
           <div className="flex space-x-6 mb-4 md:mb-0">
             <a href="#" className="text-white hover:text-amber-500 transition-colors" aria-label="Instagram">
-              <i className="fab fa-instagram"></i>
+              <FontAwesomeIcon icon={faInstagram} />
             </a>
             <a href="#" className="text-white hover:text-amber-500 transition-colors" aria-label="Twitter">
-              <i className="fab fa-twitter"></i>
+              <FontAwesomeIcon icon={faTwitter} />
             </a>
             <a href="#" className="text-white hover:text-amber-500 transition-colors" aria-label="Facebook">
-              <i className="fab fa-facebook"></i>
+              <FontAwesomeIcon icon={faFacebook} />
             </a>
             <a href="#" className="text-white hover:text-amber-500 transition-colors" aria-label="TikTok">
-              <i className="fab fa-tiktok"></i>
+              <FontAwesomeIcon icon={faTiktok} />
             </a>
           </div>
           
