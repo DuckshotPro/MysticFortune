@@ -1,23 +1,51 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCrown, faCheck, faTimes } from "@fortawesome/free-solid-svg-icons";
+import { faCrown, faCheck, faTimes, faCircleCheck } from "@fortawesome/free-solid-svg-icons";
 import { CheckoutForm } from "@/components/monetization/CheckoutForm";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { hasPremiumAccess, setPremiumStatus } from "@/lib/premiumUtils";
 
 export default function Premium() {
   const [selectedPlan, setSelectedPlan] = useState<"monthly" | "annual">("annual");
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isPurchaseComplete, setIsPurchaseComplete] = useState(false);
+  const [hasPremium, setHasPremium] = useState(false);
   const { toast } = useToast();
   
+  // Check for existing premium status on load
+  useEffect(() => {
+    const premiumStatus = hasPremiumAccess();
+    setHasPremium(premiumStatus);
+    setIsPurchaseComplete(premiumStatus);
+  }, []);
+  
   const handleSubscribe = (plan: "monthly" | "annual") => {
+    if (hasPremium) {
+      toast({
+        title: "Already Subscribed",
+        description: "You already have an active premium subscription.",
+        variant: "default",
+      });
+      return;
+    }
     setSelectedPlan(plan);
     setIsCheckoutOpen(true);
+  };
+  
+  const handleCancelSubscription = () => {
+    setPremiumStatus(false);
+    setHasPremium(false);
+    setIsPurchaseComplete(false);
+    toast({
+      title: "Subscription Cancelled",
+      description: "Your premium subscription has been cancelled.",
+      variant: "default",
+    });
   };
   
   return (
@@ -95,21 +123,36 @@ export default function Premium() {
               
               {/* Premium Plan */}
               <div className="bg-gradient-to-b from-indigo-900 to-purple-900 border border-amber-500/30 rounded-xl overflow-hidden shadow-xl relative">
-                <div className="absolute top-0 right-0 bg-amber-500 text-purple-950 px-4 py-1 font-bold text-sm">
-                  RECOMMENDED
-                </div>
+                {!hasPremium && (
+                  <div className="absolute top-0 right-0 bg-amber-500 text-purple-950 px-4 py-1 font-bold text-sm">
+                    RECOMMENDED
+                  </div>
+                )}
+                
+                {hasPremium && (
+                  <div className="absolute top-0 right-0 bg-green-500 text-white px-4 py-1 font-bold text-sm">
+                    ACTIVE
+                  </div>
+                )}
                 
                 <div className="p-6 border-b border-amber-500/20">
                   <div className="flex items-center gap-2">
                     <FontAwesomeIcon icon={faCrown} className="text-amber-400" />
                     <h2 className="font-['Cinzel'] text-2xl text-amber-400">Premium</h2>
                   </div>
-                  <p className="text-3xl font-bold text-white mt-2">
-                    {selectedPlan === 'monthly' ? '$9.99' : '$7.99'} 
-                    <span className="text-sm font-normal text-white/60">
-                      /{selectedPlan === 'monthly' ? 'month' : 'month, billed annually'}
-                    </span>
-                  </p>
+                  {!hasPremium ? (
+                    <p className="text-3xl font-bold text-white mt-2">
+                      {selectedPlan === 'monthly' ? '$9.99' : '$7.99'} 
+                      <span className="text-sm font-normal text-white/60">
+                        /{selectedPlan === 'monthly' ? 'month' : 'month, billed annually'}
+                      </span>
+                    </p>
+                  ) : (
+                    <p className="text-xl font-bold text-green-400 mt-2 flex items-center">
+                      <FontAwesomeIcon icon={faCircleCheck} className="mr-2" />
+                      Active Subscription
+                    </p>
+                  )}
                 </div>
                 
                 <div className="p-6">
@@ -140,13 +183,28 @@ export default function Premium() {
                     </li>
                   </ul>
                   
-                  <Button 
-                    className="w-full mt-8 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-purple-950 font-bold border-none"
-                    onClick={() => handleSubscribe(selectedPlan)}
-                  >
-                    <FontAwesomeIcon icon={faCrown} className="mr-2" />
-                    Subscribe Now
-                  </Button>
+                  {!hasPremium ? (
+                    <Button 
+                      className="w-full mt-8 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-purple-950 font-bold border-none"
+                      onClick={() => handleSubscribe(selectedPlan)}
+                    >
+                      <FontAwesomeIcon icon={faCrown} className="mr-2" />
+                      Subscribe Now
+                    </Button>
+                  ) : (
+                    <div className="mt-8 space-y-3">
+                      <div className="p-3 bg-green-900/30 border border-green-600/30 rounded-md text-sm text-white">
+                        You are currently enjoying all premium features. Thank you for your support!
+                      </div>
+                      <Button 
+                        className="w-full bg-white/10 hover:bg-white/20 border border-white/30"
+                        onClick={handleCancelSubscription}
+                      >
+                        <FontAwesomeIcon icon={faTimes} className="mr-2" />
+                        Cancel Subscription
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

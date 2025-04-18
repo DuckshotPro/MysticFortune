@@ -3,6 +3,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Spinner } from '@/components/ui/spinner';
 import { apiRequest } from '@/lib/queryClient';
 import { Button } from '@/components/ui/button';
+import { setPremiumStatus } from '@/lib/premiumUtils';
 
 // This component handles the Stripe payment flow without directly using Stripe Elements
 // As we need to check for API keys first, we'll show a placeholder UI
@@ -52,11 +53,15 @@ export function CheckoutForm({ amount, planType, onSuccess, onCancel }: Checkout
         
         // Simulate success for demo purposes
         setTimeout(() => {
+          // Set premium status in local storage
+          setPremiumStatus(true);
+          
           toast({
             title: 'Premium Activated!',
             description: `You've successfully subscribed to our ${planType} premium plan.`,
             variant: 'default',
           });
+          
           if (onSuccess) onSuccess();
         }, 1500);
       }
