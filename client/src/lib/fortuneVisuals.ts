@@ -66,7 +66,7 @@ export const generateFortuneBackground = (category: FortuneCategoryType, title: 
       </text>
       
       <text x="600" y="320" font-family="serif" font-size="150" fill="white" text-anchor="middle" opacity="0.2">
-        ${scheme.symbol}
+        *
       </text>
       
       <text x="600" y="530" font-family="Montserrat, sans-serif" font-size="24" fill="white" text-anchor="middle">
@@ -79,7 +79,8 @@ export const generateFortuneBackground = (category: FortuneCategoryType, title: 
     </svg>
   `;
   
-  return `data:image/svg+xml;base64,${btoa(svg)}`;
+  // Use encodeURIComponent instead of btoa to handle Unicode characters
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
 };
 
 // Engaging snippets for different types of fortunes
@@ -87,22 +88,22 @@ export const generateFortuneSnippet = (content: string, category: FortuneCategor
   // Limit content to a reasonable length for sharing
   const trimmedContent = content.length > 100 ? content.substring(0, 100) + "..." : content;
   
-  // Engaging intros based on fortune category
+  // Engaging intros based on fortune category (using plain text instead of emojis to avoid encoding issues)
   const intros = {
     love: [
-      "❤️ The stars have revealed my love fortune: ",
-      "💫 My cosmic love reading just revealed: ",
-      "✨ My mystic love prediction says: "
+      "The stars have revealed my love fortune: ",
+      "My cosmic love reading just revealed: ",
+      "My mystic love prediction says: "
     ],
     career: [
-      "💼 Just received this career guidance from the cosmos: ",
-      "⚡ My professional fortune has been revealed: ",
-      "🌟 My career path according to the stars: "
+      "Just received this career guidance from the cosmos: ",
+      "My professional fortune has been revealed: ",
+      "My career path according to the stars: "
     ],
     general: [
-      "✨ The universe just sent me this message: ",
-      "🔮 My mystical fortune for today: ",
-      "🌌 The cosmic forces have spoken: "
+      "The universe just sent me this message: ",
+      "My mystical fortune for today: ",
+      "The cosmic forces have spoken: "
     ]
   };
   
@@ -121,7 +122,7 @@ export const generateCallToAction = (platform: string): string => {
     facebook: "Discover your own cosmic destiny!",
     twitter: "What does the universe have in store for you? Find out now!",
     snapchat: "Swipe up to reveal your mystical fortune!",
-    whatsapp: "Click to uncover your own spiritual guidance ✨",
+    whatsapp: "Click to uncover your own spiritual guidance",
     telegram: "Tap to see what the stars have in store for you!",
     pinterest: "Save this mystical wisdom and find your own fortune!",
     copy: "Share this mystical insight with friends who need guidance!"
