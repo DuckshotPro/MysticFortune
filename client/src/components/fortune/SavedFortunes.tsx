@@ -118,7 +118,7 @@ export default function SavedFortunes() {
               {filteredFortunes && filteredFortunes.length > 0 && (
                 <div className="mt-6 text-center">
                   <button className="text-amber-500 hover:text-amber-400 font-['Cinzel'] text-sm">
-                    View All Saved Fortunes <i className="fas fa-arrow-right ml-1"></i>
+                    View All Saved Fortunes <FontAwesomeIcon icon={faArrowRight} className="ml-1" />
                   </button>
                 </div>
               )}

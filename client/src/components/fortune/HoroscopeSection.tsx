@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { getZodiacDateRange, getStarRating, capitalizeFirstLetter } from "@/lib/utils";
 import { fadeIn } from "@/lib/animations";
-import { ZodiacSignType } from "@shared/schema";
+import { ZodiacSignType, Horoscope } from "@shared/schema";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { 
   faFire, 
@@ -80,7 +80,7 @@ const StarRating = ({ rating, label }: { rating: number, label: string }) => {
 export default function HoroscopeSection() {
   const [selectedSign, setSelectedSign] = useState<ZodiacSignType>("taurus");
   
-  const { data: horoscope, isLoading } = useQuery({
+  const { data: horoscope, isLoading } = useQuery<Horoscope>({
     queryKey: [`/api/horoscopes/${selectedSign}`]
   });
   
@@ -144,18 +144,18 @@ export default function HoroscopeSection() {
                   </div>
                   
                   <div className="mb-4">
-                    <p className="mb-3">{horoscope.content}</p>
+                    <p className="mb-3">{(horoscope as Horoscope).content}</p>
                     <div className="flex space-x-2 text-xs text-white/70">
-                      <span>Lucky Number: {horoscope.luckyNumber}</span>
+                      <span>Lucky Number: {(horoscope as Horoscope).luckyNumber}</span>
                       <span>•</span>
-                      <span>Compatible Sign: {capitalizeFirstLetter(horoscope.compatibleSign)}</span>
+                      <span>Compatible Sign: {capitalizeFirstLetter((horoscope as Horoscope).compatibleSign)}</span>
                     </div>
                   </div>
                   
                   <div className="grid grid-cols-3 gap-2 mt-4 text-center text-sm">
-                    <StarRating rating={horoscope.loveRating} label="Love" />
-                    <StarRating rating={horoscope.careerRating} label="Career" />
-                    <StarRating rating={horoscope.healthRating} label="Health" />
+                    <StarRating rating={(horoscope as Horoscope).loveRating} label="Love" />
+                    <StarRating rating={(horoscope as Horoscope).careerRating} label="Career" />
+                    <StarRating rating={(horoscope as Horoscope).healthRating} label="Health" />
                   </div>
                 </>
               ) : (

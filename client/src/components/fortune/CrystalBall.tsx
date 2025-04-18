@@ -66,7 +66,7 @@ export default function CrystalBall() {
   const handleRevealFortune = async () => {
     const result = await refetch();
     if (result.data) {
-      setCurrentFortune(result.data);
+      setCurrentFortune(result.data as Fortune);
       setShowModal(true);
     }
   };
