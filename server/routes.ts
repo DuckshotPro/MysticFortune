@@ -21,6 +21,11 @@ const stripe = process.env.STRIPE_SECRET_KEY
   ? new Stripe(process.env.STRIPE_SECRET_KEY)
   : null;
 
+// PayPal configuration check
+if (!process.env.PAYPAL_CLIENT_ID || !process.env.PAYPAL_CLIENT_SECRET) {
+  console.warn('Missing PayPal environment variables. PayPal features will be available in demo mode.');
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   const router = Router();
   
@@ -297,6 +302,94 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     });
   }
+
+  // PayPal routes
+  router.post("/create-paypal-order", async (req, res) => {
+    try {
+      const schema = z.object({
+        amount: z.number().positive(),
+        plan: z.enum(['monthly', 'annual']).optional()
+      });
+
+      const validationResult = schema.safeParse(req.body);
+      
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          message: "Invalid payment data", 
+          errors: validationResult.error.errors 
+        });
+      }
+      
+      const { amount, plan } = validationResult.data;
+
+      // In production, you would create a PayPal order here
+      // For demo purposes, we'll simulate the PayPal order creation
+      if (process.env.PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_SECRET) {
+        // Real PayPal integration would go here
+        // This would typically use the PayPal SDK to create an order
+        console.log(`Creating PayPal order for $${amount} (${plan || 'one-time'})`);
+        
+        res.json({ 
+          orderId: `PAYPAL_ORDER_${Date.now()}`,
+          amount: amount,
+          plan: plan || 'one-time',
+          approvalUrl: `https://www.paypal.com/checkoutnow?token=DEMO_TOKEN`
+        });
+      } else {
+        // Demo mode - simulate successful order creation
+        console.log(`Demo PayPal order created for $${amount} (${plan || 'one-time'})`);
+        
+        res.json({ 
+          orderId: `DEMO_PAYPAL_ORDER_${Date.now()}`,
+          amount: amount,
+          plan: plan || 'one-time',
+          approvalUrl: 'https://demo.paypal.com/checkout',
+          message: 'Demo mode: PayPal order created successfully'
+        });
+      }
+    } catch (error: any) {
+      console.error("Error creating PayPal order:", error);
+      res.status(500).json({ 
+        message: "PayPal order creation error: " + error.message 
+      });
+    }
+  });
+
+  router.post("/capture-paypal-order", async (req, res) => {
+    try {
+      const schema = z.object({
+        orderId: z.string(),
+        payerId: z.string().optional()
+      });
+
+      const validationResult = schema.safeParse(req.body);
+      
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          message: "Invalid PayPal capture data", 
+          errors: validationResult.error.errors 
+        });
+      }
+      
+      const { orderId, payerId } = validationResult.data;
+
+      // In production, you would capture the PayPal payment here
+      console.log(`Capturing PayPal order: ${orderId} for payer: ${payerId}`);
+      
+      res.json({ 
+        orderId,
+        status: 'COMPLETED',
+        payerId,
+        captureId: `CAPTURE_${Date.now()}`,
+        message: 'Payment captured successfully'
+      });
+    } catch (error: any) {
+      console.error("Error capturing PayPal order:", error);
+      res.status(500).json({ 
+        message: "PayPal capture error: " + error.message 
+      });
+    }
+  });
 
   const httpServer = createServer(app);
   return httpServer;

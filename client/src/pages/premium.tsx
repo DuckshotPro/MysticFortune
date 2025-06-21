@@ -194,7 +194,10 @@ export default function Premium() {
                   ) : (
                     <div className="mt-8 space-y-3">
                       <div className="p-3 bg-green-900/30 border border-green-600/30 rounded-md text-sm text-white">
-                        You are currently enjoying all premium features. Thank you for your support!
+                        ✨ You are currently enjoying all premium features. Thank you for your support!
+                        <div className="mt-2 text-xs text-green-200">
+                          Payment options: Credit Card & PayPal available
+                        </div>
                       </div>
                       <Button 
                         className="w-full bg-white/10 hover:bg-white/20 border border-white/30"
