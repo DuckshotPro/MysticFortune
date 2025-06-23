@@ -5,7 +5,8 @@ import { apiRequest } from '@/lib/queryClient';
 import { Button } from '@/components/ui/button';
 import { setPremiumStatus } from '@/lib/premiumUtils';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCreditCard, faPaypal } from '@fortawesome/free-brands-svg-icons';
+import { faCreditCard } from '@fortawesome/free-solid-svg-icons';
+import { faPaypal } from '@fortawesome/free-brands-svg-icons';
 
 // This component handles the Stripe payment flow without directly using Stripe Elements
 // As we need to check for API keys first, we'll show a placeholder UI
