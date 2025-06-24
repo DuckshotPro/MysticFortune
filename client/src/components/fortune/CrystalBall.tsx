@@ -152,21 +152,30 @@ export default function CrystalBall() {
                     label="Love"
                     icon={faHeart}
                     isSelected={selectedCategory === "love"}
-                    onClick={() => setSelectedCategory("love")}
+                    onClick={() => {
+                      setSelectedCategory("love");
+                      playSoundEffect('cosmic-transition');
+                    }}
                   />
                   <CategoryButton
                     category="career"
                     label="Career"
                     icon={faBriefcase}
                     isSelected={selectedCategory === "career"}
-                    onClick={() => setSelectedCategory("career")}
+                    onClick={() => {
+                      setSelectedCategory("career");
+                      playSoundEffect('cosmic-transition');
+                    }}
                   />
                   <CategoryButton
                     category="general"
                     label="General"
                     icon={faStar}
                     isSelected={selectedCategory === "general"}
-                    onClick={() => setSelectedCategory("general")}
+                    onClick={() => {
+                      setSelectedCategory("general");
+                      playSoundEffect('cosmic-transition');
+                    }}
                   />
                 </div>
               </div>

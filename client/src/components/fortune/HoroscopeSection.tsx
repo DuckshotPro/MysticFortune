@@ -8,6 +8,7 @@ import { getZodiacDateRange, getStarRating, capitalizeFirstLetter } from "@/lib/
 import { fadeIn } from "@/lib/animations";
 import { ZodiacSignType, Horoscope } from "@shared/schema";
 import { AdBanner } from "@/components/monetization/AdBanner";
+import { useSound } from "@/hooks/useSound";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { 
   faFire, 

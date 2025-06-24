@@ -82,6 +82,7 @@ const TarotCard = ({ position, description, card }: TarotCardProps) => {
 export default function FortuneCards() {
   const [readingType, setReadingType] = useState<CardReadingType>("three-card");
   const [cards, setCards] = useState(generateRandomCards());
+  const { playSoundEffect, playFortuneMusic } = useSound();
 
   function generateRandomCards() {
     const shuffled = [...tarotCards].sort(() => 0.5 - Math.random());
@@ -95,7 +96,12 @@ export default function FortuneCards() {
   ];
 
   const handleShuffle = () => {
-    setCards(generateRandomCards());
+    playSoundEffect('energy-pulse');
+    playFortuneMusic('tarot');
+    setTimeout(() => {
+      setCards(generateRandomCards());
+      playSoundEffect('mystical-reveal');
+    }, 1000);
   };
 
   return (
@@ -118,7 +124,10 @@ export default function FortuneCards() {
               className={`px-4 py-2 rounded text-sm font-['Cinzel'] ${
                 readingType === "three-card" ? "bg-purple-900" : ""
               }`}
-              onClick={() => setReadingType("three-card")}
+              onClick={() => {
+                setReadingType("three-card");
+                playSoundEffect('cosmic-transition');
+              }}
             >
               Three Card
             </Button>
@@ -127,7 +136,10 @@ export default function FortuneCards() {
               className={`px-4 py-2 rounded text-sm font-['Cinzel'] ${
                 readingType === "single-card" ? "bg-purple-900" : ""
               }`}
-              onClick={() => setReadingType("single-card")}
+              onClick={() => {
+                setReadingType("single-card");
+                playSoundEffect('cosmic-transition');
+              }}
             >
               Single Card
             </Button>
@@ -136,7 +148,10 @@ export default function FortuneCards() {
               className={`px-4 py-2 rounded text-sm font-['Cinzel'] ${
                 readingType === "celtic-cross" ? "bg-purple-900" : ""
               }`}
-              onClick={() => setReadingType("celtic-cross")}
+              onClick={() => {
+                setReadingType("celtic-cross");
+                playSoundEffect('cosmic-transition');
+              }}
             >
               Celtic Cross
             </Button>
