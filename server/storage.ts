@@ -123,7 +123,30 @@ export class MemStorage implements IStorage {
   }
   
   async getHoroscopeBySign(sign: ZodiacSignType): Promise<Horoscope | undefined> {
-    return this.horoscopesDb.get(sign);
+    const horoscope = this.horoscopesDb.get(sign);
+    if (!horoscope) return undefined;
+    
+    // Add daily variation to horoscope content while maintaining core structure
+    const variations = [
+      "Today's cosmic energy particularly emphasizes ",
+      "The planetary alignments suggest a focus on ",
+      "Your natural " + sign + " qualities are highlighted through ",
+      "The universe encourages you to embrace "
+    ];
+    
+    const today = new Date();
+    const dayIndex = today.getDate() % variations.length;
+    const variation = variations[dayIndex];
+    
+    // Create a slightly varied version while keeping original meaning
+    const enhancedContent = horoscope.content.replace(/^[A-Z]/, (match) => 
+      variation + match.toLowerCase()
+    );
+    
+    return {
+      ...horoscope,
+      content: enhancedContent
+    };
   }
   
   async createHoroscope(insertHoroscope: InsertHoroscope): Promise<Horoscope> {
@@ -135,69 +158,88 @@ export class MemStorage implements IStorage {
   }
   
   private initializeFortunes() {
-    // Love fortunes
-    this.createFortune({
-      title: "Love Awaits",
-      content: "A meaningful connection with someone from your past will resurface soon. Be open to rekindling this relationship in a new form.",
-      category: "love"
+    // Expanded Love fortunes collection
+    const loveFortunesData = [
+      { title: "Love Awaits", content: "A meaningful connection with someone from your past will resurface soon. Be open to rekindling this relationship in a new form." },
+      { title: "Heart's Desire", content: "Your heart's deepest desire will manifest in unexpected ways. Stay open to love appearing in forms you might not recognize at first." },
+      { title: "Romantic Journey", content: "A new romantic journey is about to begin. Trust that the universe is guiding you toward meaningful connections." },
+      { title: "Soul Recognition", content: "Someone who truly understands your deepest aspirations will enter your life through a creative or spiritual pursuit." },
+      { title: "Passionate Awakening", content: "A shared interest or hobby will spark a romantic connection with someone who appreciates your authentic self." },
+      { title: "Emotional Liberation", content: "Breaking free from past relationship patterns will attract a partner who mirrors your newfound self-respect." },
+      { title: "Divine Timing", content: "The universe is orchestrating a destined meeting. Trust in perfect timing and remain open to unexpected encounters." },
+      { title: "Heart Healing", content: "Self-love practices will magnetize a relationship that supports your highest growth and happiness." },
+      { title: "Love's Transformation", content: "Your understanding of love is evolving. Open communication will unlock deeper intimacy in existing relationships." },
+      { title: "Romantic Renaissance", content: "Past emotional wounds are healing completely, creating space for authentic love to flourish in your life." }
+    ];
+
+    // Expanded Career fortunes collection  
+    const careerFortunesData = [
+      { title: "Career Advancement", content: "A leadership opportunity will present itself soon. Your preparation will be the key to success in this new role." },
+      { title: "Creative Success", content: "Your creative talents will soon be recognized by someone influential. This recognition will open doors to new opportunities." },
+      { title: "Professional Growth", content: "A period of significant professional growth awaits you. Embrace challenges as they are preparing you for advancement." },
+      { title: "Financial Abundance", content: "Multiple income streams will develop as you align your work with your authentic passions and natural talents." },
+      { title: "Network Expansion", content: "A chance conversation will connect you with a mentor who accelerates your professional growth exponentially." },
+      { title: "Skill Mastery", content: "Time invested in learning complementary skills will unexpectedly become your greatest professional asset." },
+      { title: "Entrepreneurial Spirit", content: "Your side project has potential to become your primary income source with dedicated focus and patience." },
+      { title: "Recognition Ripple", content: "Consistent excellence in small tasks will create a reputation that leads to extraordinary opportunities." },
+      { title: "Innovation Breakthrough", content: "A breakthrough idea will position you as a thought leader in your field. Document your insights carefully." },
+      { title: "Leadership Emergence", content: "Your natural ability to inspire others will be called upon for a significant project or initiative." }
+    ];
+
+    // Expanded General fortunes collection
+    const generalFortunesData = [
+      { title: "Life's Path", content: "Trust your intuition in the coming days. A moment of clarity will guide your next steps on life's journey." },
+      { title: "Spiritual Awakening", content: "You are on the verge of a spiritual awakening. Pay attention to signs and symbols that appear in your daily life." },
+      { title: "Inner Wisdom", content: "Your inner wisdom holds the answers you seek. Take time for quiet reflection to access this profound knowledge." },
+      { title: "Synchronicity Storm", content: "Meaningful coincidences will guide you toward important life decisions. Notice repeating patterns and symbols." },
+      { title: "Wellness Revolution", content: "Small daily health improvements will compound into remarkable vitality and enhanced mental clarity." },
+      { title: "Family Harmony", content: "Understanding and forgiveness will heal long-standing family tensions through unexpected conversations." },
+      { title: "Creative Expression", content: "Your unique talents are meant to inspire others. Don't let perfectionism block your creative gifts." },
+      { title: "Travel Destiny", content: "A journey will introduce you to people and experiences that fundamentally change your worldview." },
+      { title: "Abundance Flow", content: "Shifting from scarcity to gratitude thinking will manifest opportunities you never imagined possible." },
+      { title: "Wisdom Integration", content: "Past challenges will reveal their purpose in preparing you for an important upcoming phase of growth." }
+    ];
+
+    // Initialize all fortune categories
+    loveFortunesData.forEach(fortune => {
+      this.createFortune({ ...fortune, category: "love" });
     });
-    
-    this.createFortune({
-      title: "Heart's Desire",
-      content: "Your heart's deepest desire will manifest in unexpected ways. Stay open to love appearing in forms you might not recognize at first.",
-      category: "love"
+
+    careerFortunesData.forEach(fortune => {
+      this.createFortune({ ...fortune, category: "career" });
     });
-    
-    this.createFortune({
-      title: "Romantic Journey",
-      content: "A new romantic journey is about to begin. Trust that the universe is guiding you toward meaningful connections.",
-      category: "love"
-    });
-    
-    // Career fortunes
-    this.createFortune({
-      title: "Career Advancement",
-      content: "A leadership opportunity will present itself soon. Your preparation will be the key to success in this new role.",
-      category: "career"
-    });
-    
-    this.createFortune({
-      title: "Creative Success",
-      content: "Your creative talents will soon be recognized by someone influential. This recognition will open doors to new opportunities.",
-      category: "career"
-    });
-    
-    this.createFortune({
-      title: "Professional Growth",
-      content: "A period of significant professional growth awaits you. Embrace challenges as they are preparing you for advancement.",
-      category: "career"
-    });
-    
-    // General fortunes
-    this.createFortune({
-      title: "Life's Path",
-      content: "Trust your intuition in the coming days. A moment of clarity will guide your next steps on life's journey.",
-      category: "general"
-    });
-    
-    this.createFortune({
-      title: "Spiritual Awakening",
-      content: "You are on the verge of a spiritual awakening. Pay attention to signs and symbols that appear in your daily life.",
-      category: "general"
-    });
-    
-    this.createFortune({
-      title: "Inner Wisdom",
-      content: "Your inner wisdom holds the answers you seek. Take time for quiet reflection to access this profound knowledge.",
-      category: "general"
+
+    generalFortunesData.forEach(fortune => {
+      this.createFortune({ ...fortune, category: "general" });
     });
   }
   
   private initializeHoroscopes() {
+    // Enhanced horoscope content with deeper insights
+    const horoscopeVariations = {
+      aries: [
+        {
+          content: "Mars energizes your personal magnetism today, Aries. Leadership opportunities emerge in unexpected places. Your pioneering spirit inspires others to take bold action.",
+          focus: "Take initiative in collaborative projects and trust your instincts in competitive situations."
+        },
+        {
+          content: "Your natural courage is highlighted today, Aries. A challenge that seemed insurmountable will reveal a clear path forward. Dynamic energy supports all endeavors.",
+          focus: "Channel your enthusiasm into physical activities and creative pursuits that showcase your originality."
+        }
+      ],
+      taurus: [
+        {
+          content: "Venus blesses your practical endeavors today, Taurus. Steady progress in financial matters brings lasting security. Your patience creates valuable opportunities.",
+          focus: "Focus on building solid foundations and nurturing existing relationships with consistency and care."
+        }
+      ],
+      // Add more variations for other signs as needed
+    };
+
     this.createHoroscope({
       sign: "aries",
-      content: "Today brings exciting opportunities for advancement, Aries. Your natural leadership abilities will shine, particularly in group settings. Focus on collaborative projects.",
-      loveRating: 3,
+      content: "Mars energizes your personal magnetism today, Aries. Leadership opportunities emerge in unexpected places. Your pioneering spirit inspires others to take bold action. Take initiative in collaborative projects and trust your instincts in competitive situations.",
+      loveRating: 4,
       careerRating: 5,
       healthRating: 4,
       luckyNumber: 7,

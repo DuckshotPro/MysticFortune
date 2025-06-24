@@ -8,6 +8,7 @@ import HoroscopeSection from "@/components/fortune/HoroscopeSection";
 import FortuneCards from "@/components/fortune/FortuneCards";
 import SavedFortunes from "@/components/fortune/SavedFortunes";
 import { AdBanner } from "@/components/monetization/AdBanner";
+import { WeeklyPreview } from "@/components/premium/WeeklyPreview";
 import { shouldShowAds } from "@/lib/premiumUtils";
 
 export default function Home() {
@@ -43,6 +44,12 @@ export default function Home() {
         )}
         
         <HoroscopeSection />
+        
+        {/* Weekly Preview - Premium Feature */}
+        <div className="container mx-auto px-4 py-8">
+          <WeeklyPreview />
+        </div>
+        
         <FortuneCards />
         <SavedFortunes />
       </main>
