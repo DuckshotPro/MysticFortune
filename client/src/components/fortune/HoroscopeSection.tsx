@@ -80,6 +80,7 @@ const StarRating = ({ rating, label }: { rating: number, label: string }) => {
 
 export default function HoroscopeSection() {
   const [selectedSign, setSelectedSign] = useState<ZodiacSignType>("taurus");
+  const { playSoundEffect, playFortuneMusic } = useSound();
   
   const { data: horoscope, isLoading } = useQuery<Horoscope>({
     queryKey: [`/api/horoscopes/${selectedSign}`]
@@ -87,6 +88,8 @@ export default function HoroscopeSection() {
   
   const handleSignChange = (sign: ZodiacSignType) => {
     setSelectedSign(sign);
+    playSoundEffect('cosmic-transition');
+    playFortuneMusic('horoscope');
   };
   
   // Group zodiac signs into rows for better mobile layout

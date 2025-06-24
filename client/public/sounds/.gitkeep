@@ -1,0 +1,2 @@
+# Sound files would go here in production
+# The app gracefully falls back to synthesized sounds when files are missing

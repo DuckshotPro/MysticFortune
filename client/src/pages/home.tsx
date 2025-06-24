@@ -9,6 +9,7 @@ import FortuneCards from "@/components/fortune/FortuneCards";
 import SavedFortunes from "@/components/fortune/SavedFortunes";
 import { AdBanner } from "@/components/monetization/AdBanner";
 import { WeeklyPreview } from "@/components/premium/WeeklyPreview";
+import { SoundControls } from "@/components/ui/sound-controls";
 import { shouldShowAds } from "@/lib/premiumUtils";
 
 export default function Home() {
