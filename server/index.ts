@@ -79,3 +79,12 @@ app.use((req, res, next) => {
     log(`serving on port ${port}`);
   });
 })();
+
+// Seed database after server starts
+(async () => {
+  try {
+    await seedDatabase();
+  } catch (error) {
+    console.error("Failed to seed database:", error);
+  }
+})();
