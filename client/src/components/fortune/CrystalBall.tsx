@@ -8,6 +8,7 @@ import { FortuneCategoryType, Fortune } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { Spinner } from "@/components/ui/spinner";
 import { float, spin } from "@/lib/animations";
+import { useSound } from "@/hooks/useSound";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { 
   faHeart, 
@@ -46,6 +47,7 @@ export default function CrystalBall() {
   const [selectedCategory, setSelectedCategory] = useState<FortuneCategoryType>("love");
   const [showModal, setShowModal] = useState(false);
   const [currentFortune, setCurrentFortune] = useState<Fortune | null>(null);
+  const { playSoundEffect, playFortuneMusic } = useSound();
 
   const { data: fortune, isLoading, refetch } = useQuery({
     queryKey: [`/api/fortunes/${selectedCategory}`],
@@ -64,10 +66,13 @@ export default function CrystalBall() {
   });
 
   const handleRevealFortune = async () => {
+    playSoundEffect('energy-pulse');
+    playFortuneMusic('crystal-ball');
     const result = await refetch();
     if (result.data) {
       setCurrentFortune(result.data as Fortune);
       setShowModal(true);
+      playSoundEffect('mystical-reveal');
     }
   };
 

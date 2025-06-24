@@ -35,6 +35,12 @@ export default function Home() {
       <Header />
       <main className="flex-grow pb-16" id="main-content">
         <Hero />
+        
+        {/* Sound Controls - Fixed Position */}
+        <div className="fixed top-20 right-4 z-40">
+          <SoundControls compact />
+        </div>
+        
         <CrystalBall />
         
         {/* Inline Ad - only shown for non-premium users */}
@@ -49,6 +55,11 @@ export default function Home() {
         {/* Weekly Preview - Premium Feature */}
         <div className="container mx-auto px-4 py-8">
           <WeeklyPreview />
+        </div>
+        
+        {/* Full Sound Controls */}
+        <div className="container mx-auto px-4 py-8">
+          <SoundControls />
         </div>
         
         <FortuneCards />

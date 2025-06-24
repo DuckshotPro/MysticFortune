@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { tarotCards } from "@/lib/data";
 import { flipCard, fadeIn } from "@/lib/animations";
+import { useSound } from "@/hooks/useSound";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faQuestion, faRedoAlt, faBook, faStar, faChartLine } from "@fortawesome/free-solid-svg-icons";
 import { PremiumFeature } from "@/components/monetization/PremiumFeature";
