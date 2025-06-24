@@ -4,6 +4,9 @@
 A comprehensive fortune telling web application that provides users with mystical insights through multiple divination methods including Crystal Ball readings, Daily Horoscopes, and Tarot Card spreads. The application features a dark mystical theme with purple and golden accents, creating an authentic spiritual experience.
 
 ## Recent Changes
+- **June 2025**: Migrated from in-memory storage to PostgreSQL database using Neon backend
+- **June 2025**: Implemented full database schema with proper relations for users, fortunes, horoscopes, and saved fortunes
+- **June 2025**: Added comprehensive database seeding with 15 unique fortunes and 12 detailed horoscopes
 - **January 2025**: Dramatically expanded content generation system with 3x more fortune variations
 - **January 2025**: Added seasonal content rotation based on current time of year
 - **January 2025**: Implemented daily theme variations for horoscopes
@@ -22,10 +25,11 @@ A comprehensive fortune telling web application that provides users with mystica
 - **Sharing System**: Social media integration with tracking, visual fortune cards
 
 ### Backend (Express + TypeScript)
-- **Storage**: In-memory storage with expanded fortune database (30+ fortunes per category)
-- **Content Rotation**: Date-based fortune cycling for variety
-- **Horoscope Variations**: Daily content modifications while maintaining core meanings
-- **API Routes**: Enhanced fortune retrieval with seasonal context
+- **Database**: PostgreSQL with Neon backend for reliable data persistence
+- **Storage**: DatabaseStorage class with full CRUD operations for all entities
+- **Schema**: Drizzle ORM with proper table relations and type safety
+- **Content**: 15 unique fortunes across categories, 12 complete horoscope profiles with ratings
+- **API Routes**: Enhanced fortune retrieval with database querying and seasonal context
 
 ### Enhanced Content Features
 - **Seasonal Fortunes**: Spring, Summer, Autumn, Winter themed content

@@ -4,10 +4,12 @@ import { FortuneCategory, ZodiacSigns } from "@shared/schema";
 
 export async function seedDatabase() {
   try {
-    // Always seed fresh data for database migration
-    console.log("Clearing existing data...");
-    await db.delete(horoscopes);
-    await db.delete(fortunes);
+    // Check if data already exists
+    const existingFortunes = await db.select().from(fortunes).limit(1);
+    if (existingFortunes.length > 0) {
+      console.log("Database already seeded, skipping...");
+      return;
+    }
 
     console.log("Seeding database with initial data...");
 
