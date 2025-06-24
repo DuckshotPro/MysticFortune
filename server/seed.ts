@@ -4,12 +4,10 @@ import { FortuneCategory, ZodiacSigns } from "@shared/schema";
 
 export async function seedDatabase() {
   try {
-    // Check if data already exists
-    const existingFortunes = await db.select().from(fortunes).limit(1);
-    if (existingFortunes.length > 0) {
-      console.log("Database already seeded, skipping...");
-      return;
-    }
+    // Always seed fresh data for database migration
+    console.log("Clearing existing data...");
+    await db.delete(horoscopes);
+    await db.delete(fortunes);
 
     console.log("Seeding database with initial data...");
 
@@ -45,20 +43,20 @@ export async function seedDatabase() {
 
     await db.insert(fortunes).values(fortuneData);
 
-    // Seed horoscopes with all required fields
+    // Seed horoscopes with correct schema fields
     const horoscopeData = [
-      { sign: ZodiacSigns.ARIES, content: "Today's cosmic energy ignites your pioneering spirit, dear Aries. Mars, your ruling planet, bestows courage for new beginnings. Trust your instincts and take that leap of faith you've been contemplating.", loveRating: 4, careerRating: 5, healthRating: 4, luckyNumbers: [3, 17, 22], luckyColor: "Red" },
-      { sign: ZodiacSigns.TAURUS, content: "Venus graces your sign with abundance and beauty, steadfast Taurus. Material and emotional security flourish under today's celestial influence. Plant seeds of intention in fertile ground.", loveRating: 5, careerRating: 4, healthRating: 5, luckyNumbers: [6, 14, 28], luckyColor: "Green" },
-      { sign: ZodiacSigns.GEMINI, content: "Mercury dances through your communication sector, clever Gemini. Words carry extra power today - use them wisely to inspire and connect. Your curiosity opens unexpected doors.", loveRating: 3, careerRating: 5, healthRating: 3, luckyNumbers: [7, 12, 25], luckyColor: "Yellow" },
-      { sign: ZodiacSigns.CANCER, content: "The Moon illuminates your emotional depths, sensitive Cancer. Family and home matters take precedence under today's nurturing energy. Trust your intuitive guidance in all decisions.", loveRating: 5, careerRating: 3, healthRating: 4, luckyNumbers: [2, 16, 29], luckyColor: "Silver" },
-      { sign: ZodiacSigns.LEO, content: "The Sun shines brilliantly on your creative expression, radiant Leo. Your natural magnetism attracts opportunities and admirers alike. Share your gifts generously with the world.", loveRating: 4, careerRating: 5, healthRating: 4, luckyNumbers: [1, 19, 31], luckyColor: "Gold" },
-      { sign: ZodiacSigns.VIRGO, content: "Earth energy supports your practical endeavors, meticulous Virgo. Details others overlook become your stepping stones to success. Your service to others creates positive karma.", loveRating: 3, careerRating: 5, healthRating: 5, luckyNumbers: [9, 15, 27], luckyColor: "Navy" },
-      { sign: ZodiacSigns.LIBRA, content: "Balance and harmony flow through your relationships, graceful Libra. Partnerships reach new levels of understanding and cooperation. Beauty surrounds you in unexpected forms.", loveRating: 5, careerRating: 4, healthRating: 3, luckyNumbers: [4, 13, 24], luckyColor: "Pink" },
-      { sign: ZodiacSigns.SCORPIO, content: "Transformation beckons from the depths, mysterious Scorpio. What appears to end actually begins anew in a more powerful form. Embrace your regenerative abilities.", loveRating: 4, careerRating: 4, healthRating: 4, luckyNumbers: [8, 18, 30], luckyColor: "Crimson" },
-      { sign: ZodiacSigns.SAGITTARIUS, content: "Jupiter expands your horizons beyond familiar boundaries, adventurous Sagittarius. Higher learning and distant travels call to your restless spirit. Seek truth through experience.", loveRating: 3, careerRating: 4, healthRating: 5, luckyNumbers: [5, 21, 33], luckyColor: "Purple" },
-      { sign: ZodiacSigns.CAPRICORN, content: "Saturn rewards your persistent efforts with tangible results, ambitious Capricorn. Long-term goals manifest through disciplined action. Your reputation grows stronger.", loveRating: 3, careerRating: 5, healthRating: 4, luckyNumbers: [10, 20, 26], luckyColor: "Brown" },
-      { sign: ZodiacSigns.AQUARIUS, content: "Uranus electrifies your innovative thinking, visionary Aquarius. Revolutionary ideas flow through your consciousness like lightning. Your uniqueness becomes your superpower.", loveRating: 4, careerRating: 4, healthRating: 3, luckyNumbers: [11, 23, 35], luckyColor: "Turquoise" },
-      { sign: ZodiacSigns.PISCES, content: "Neptune enhances your psychic sensitivity, intuitive Pisces. Dreams and meditation reveal hidden truths about your spiritual path. Compassion heals both yourself and others.", loveRating: 5, careerRating: 3, healthRating: 4, luckyNumbers: [12, 17, 32], luckyColor: "Sea Blue" }
+      { sign: ZodiacSigns.ARIES, content: "Today's cosmic energy ignites your pioneering spirit, dear Aries. Mars, your ruling planet, bestows courage for new beginnings. Trust your instincts and take that leap of faith you've been contemplating.", loveRating: 4, careerRating: 5, healthRating: 4, luckyNumber: 17, compatibleSign: "Leo" },
+      { sign: ZodiacSigns.TAURUS, content: "Venus graces your sign with abundance and beauty, steadfast Taurus. Material and emotional security flourish under today's celestial influence. Plant seeds of intention in fertile ground.", loveRating: 5, careerRating: 4, healthRating: 5, luckyNumber: 14, compatibleSign: "Virgo" },
+      { sign: ZodiacSigns.GEMINI, content: "Mercury dances through your communication sector, clever Gemini. Words carry extra power today - use them wisely to inspire and connect. Your curiosity opens unexpected doors.", loveRating: 3, careerRating: 5, healthRating: 3, luckyNumber: 12, compatibleSign: "Libra" },
+      { sign: ZodiacSigns.CANCER, content: "The Moon illuminates your emotional depths, sensitive Cancer. Family and home matters take precedence under today's nurturing energy. Trust your intuitive guidance in all decisions.", loveRating: 5, careerRating: 3, healthRating: 4, luckyNumber: 16, compatibleSign: "Scorpio" },
+      { sign: ZodiacSigns.LEO, content: "The Sun shines brilliantly on your creative expression, radiant Leo. Your natural magnetism attracts opportunities and admirers alike. Share your gifts generously with the world.", loveRating: 4, careerRating: 5, healthRating: 4, luckyNumber: 19, compatibleSign: "Sagittarius" },
+      { sign: ZodiacSigns.VIRGO, content: "Earth energy supports your practical endeavors, meticulous Virgo. Details others overlook become your stepping stones to success. Your service to others creates positive karma.", loveRating: 3, careerRating: 5, healthRating: 5, luckyNumber: 15, compatibleSign: "Capricorn" },
+      { sign: ZodiacSigns.LIBRA, content: "Balance and harmony flow through your relationships, graceful Libra. Partnerships reach new levels of understanding and cooperation. Beauty surrounds you in unexpected forms.", loveRating: 5, careerRating: 4, healthRating: 3, luckyNumber: 13, compatibleSign: "Aquarius" },
+      { sign: ZodiacSigns.SCORPIO, content: "Transformation beckons from the depths, mysterious Scorpio. What appears to end actually begins anew in a more powerful form. Embrace your regenerative abilities.", loveRating: 4, careerRating: 4, healthRating: 4, luckyNumber: 18, compatibleSign: "Pisces" },
+      { sign: ZodiacSigns.SAGITTARIUS, content: "Jupiter expands your horizons beyond familiar boundaries, adventurous Sagittarius. Higher learning and distant travels call to your restless spirit. Seek truth through experience.", loveRating: 3, careerRating: 4, healthRating: 5, luckyNumber: 21, compatibleSign: "Aries" },
+      { sign: ZodiacSigns.CAPRICORN, content: "Saturn rewards your persistent efforts with tangible results, ambitious Capricorn. Long-term goals manifest through disciplined action. Your reputation grows stronger.", loveRating: 3, careerRating: 5, healthRating: 4, luckyNumber: 20, compatibleSign: "Taurus" },
+      { sign: ZodiacSigns.AQUARIUS, content: "Uranus electrifies your innovative thinking, visionary Aquarius. Revolutionary ideas flow through your consciousness like lightning. Your uniqueness becomes your superpower.", loveRating: 4, careerRating: 4, healthRating: 3, luckyNumber: 23, compatibleSign: "Gemini" },
+      { sign: ZodiacSigns.PISCES, content: "Neptune enhances your psychic sensitivity, intuitive Pisces. Dreams and meditation reveal hidden truths about your spiritual path. Compassion heals both yourself and others.", loveRating: 5, careerRating: 3, healthRating: 4, luckyNumber: 17, compatibleSign: "Cancer" }
     ];
 
     await db.insert(horoscopes).values(horoscopeData);
