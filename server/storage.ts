@@ -5,6 +5,8 @@ import {
   horoscopes, type Horoscope, type InsertHoroscope,
   type FortuneCategoryType, type ZodiacSignType
 } from "@shared/schema";
+import { db } from "./db";
+import { eq, and } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -26,6 +28,90 @@ export interface IStorage {
   // Horoscope methods
   getHoroscopeBySign(sign: ZodiacSignType): Promise<Horoscope | undefined>;
   createHoroscope(horoscope: InsertHoroscope): Promise<Horoscope>;
+}
+
+export class DatabaseStorage implements IStorage {
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(insertUser)
+      .returning();
+    return user;
+  }
+
+  async getAllFortunes(): Promise<Fortune[]> {
+    return await db.select().from(fortunes);
+  }
+
+  async getFortunesByCategory(category: FortuneCategoryType): Promise<Fortune[]> {
+    return await db.select().from(fortunes).where(eq(fortunes.category, category));
+  }
+
+  async getRandomFortune(category: FortuneCategoryType): Promise<Fortune | undefined> {
+    const categoryFortunes = await db.select().from(fortunes).where(eq(fortunes.category, category));
+    if (categoryFortunes.length === 0) return undefined;
+    
+    const randomIndex = Math.floor(Math.random() * categoryFortunes.length);
+    return categoryFortunes[randomIndex];
+  }
+
+  async createFortune(insertFortune: InsertFortune): Promise<Fortune> {
+    const [fortune] = await db
+      .insert(fortunes)
+      .values(insertFortune)
+      .returning();
+    return fortune;
+  }
+
+  async getSavedFortunes(userId: number): Promise<SavedFortune[]> {
+    return await db.select().from(savedFortunes).where(eq(savedFortunes.userId, userId));
+  }
+
+  async getSavedFortunesByCategory(userId: number, category: FortuneCategoryType): Promise<SavedFortune[]> {
+    return await db.select().from(savedFortunes)
+      .where(
+        and(
+          eq(savedFortunes.userId, userId),
+          eq(savedFortunes.category, category)
+        )
+      );
+  }
+
+  async saveFortune(insertSavedFortune: InsertSavedFortune): Promise<SavedFortune> {
+    const [savedFortune] = await db
+      .insert(savedFortunes)
+      .values(insertSavedFortune)
+      .returning();
+    return savedFortune;
+  }
+
+  async deleteSavedFortune(id: number): Promise<boolean> {
+    const result = await db.delete(savedFortunes).where(eq(savedFortunes.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  async getHoroscopeBySign(sign: ZodiacSignType): Promise<Horoscope | undefined> {
+    const [horoscope] = await db.select().from(horoscopes).where(eq(horoscopes.sign, sign));
+    return horoscope || undefined;
+  }
+
+  async createHoroscope(insertHoroscope: InsertHoroscope): Promise<Horoscope> {
+    const [horoscope] = await db
+      .insert(horoscopes)
+      .values(insertHoroscope)
+      .returning();
+    return horoscope;
+  }
 }
 
 export class MemStorage implements IStorage {
@@ -358,4 +444,4 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
