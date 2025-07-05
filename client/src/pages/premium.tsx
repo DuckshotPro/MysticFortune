@@ -8,7 +8,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCrown, faCheck, faTimes, faCircleCheck } from "@fortawesome/free-solid-svg-icons";
 import { CheckoutForm } from "@/components/monetization/CheckoutForm";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { hasPremiumAccess, setPremiumStatus } from "@/lib/premiumUtils";
+import { AIArtworkGenerator } from "@/components/premium/AIArtworkGenerator";
+import { PromotionDashboard } from "@/components/promotion/PromotionDashboard";
 
 export default function Premium() {
   const [selectedPlan, setSelectedPlan] = useState<"monthly" | "annual">("annual");
@@ -212,6 +215,30 @@ export default function Premium() {
               </div>
             </div>
             
+            {/* Premium Features Section */}
+            {hasPremium && (
+              <div className="mt-16">
+                <Tabs defaultValue="ai-artwork" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2 bg-purple-900/50">
+                    <TabsTrigger value="ai-artwork" className="text-white data-[state=active]:bg-purple-700">
+                      AI Mystical Artwork
+                    </TabsTrigger>
+                    <TabsTrigger value="promotion" className="text-white data-[state=active]:bg-purple-700">
+                      Auto Promotion
+                    </TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="ai-artwork" className="mt-8">
+                    <AIArtworkGenerator />
+                  </TabsContent>
+                  
+                  <TabsContent value="promotion" className="mt-8">
+                    <PromotionDashboard />
+                  </TabsContent>
+                </Tabs>
+              </div>
+            )}
+
             <div className="text-center mt-12 text-white/70 max-w-2xl mx-auto">
               <p className="text-sm">
                 By subscribing, you agree to our Terms of Service and Privacy Policy. 

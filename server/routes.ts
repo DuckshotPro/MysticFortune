@@ -3,6 +3,8 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import Stripe from "stripe";
 import { storage } from "./storage";
+import { aiImageService } from "./aiImageService";
+import { promotionService } from "./promotionService";
 import { 
   insertFortuneSchema, 
   insertSavedFortuneSchema, 
@@ -388,6 +390,94 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ 
         message: "PayPal capture error: " + error.message 
       });
+    }
+  });
+
+  // AI Image Generation Routes
+  app.post("/api/premium/generate-artwork", async (req, res) => {
+    try {
+      const { category } = req.body;
+      const artwork = await aiImageService.generateMysticalArtwork(category);
+      
+      // Check if it's SVG content
+      const isWebPImage = artwork.imageBuffer.slice(0, 4).toString() === 'RIFF';
+      const isPNG = artwork.imageBuffer.slice(0, 8).toString('hex').startsWith('89504e47');
+      const isSVG = artwork.imageBuffer.toString().includes('<svg');
+      
+      let imageDataUrl: string;
+      if (isSVG) {
+        const base64Svg = artwork.imageBuffer.toString('base64');
+        imageDataUrl = `data:image/svg+xml;base64,${base64Svg}`;
+      } else if (isPNG) {
+        const base64Image = artwork.imageBuffer.toString('base64');
+        imageDataUrl = `data:image/png;base64,${base64Image}`;
+      } else {
+        const base64Image = artwork.imageBuffer.toString('base64');
+        imageDataUrl = `data:image/jpeg;base64,${base64Image}`;
+      }
+      
+      res.json({
+        imageUrl: imageDataUrl,
+        prompt: artwork.prompt,
+        category: artwork.category
+      });
+    } catch (error) {
+      console.error("AI artwork generation failed:", error);
+      res.status(500).json({ message: "Failed to generate artwork" });
+    }
+  });
+
+  // Promotional Content Routes
+  app.post("/api/promotion/generate-content", async (req, res) => {
+    try {
+      const { category } = req.body;
+      const content = await promotionService.generatePromotionalContent(category);
+      res.json(content);
+    } catch (error) {
+      console.error("Promotional content generation failed:", error);
+      res.status(500).json({ message: "Failed to generate promotional content" });
+    }
+  });
+
+  app.post("/api/promotion/create-asset", async (req, res) => {
+    try {
+      const { category } = req.body;
+      const asset = await promotionService.createPromotionalAsset(category);
+      res.json(asset);
+    } catch (error) {
+      console.error("Promotional asset creation failed:", error);
+      res.status(500).json({ message: "Failed to create promotional asset" });
+    }
+  });
+
+  app.post("/api/promotion/schedule-posts", async (req, res) => {
+    try {
+      const { frequency } = req.body;
+      const posts = await promotionService.scheduleAutomatedPosts(frequency);
+      res.json({ scheduledPosts: posts });
+    } catch (error) {
+      console.error("Post scheduling failed:", error);
+      res.status(500).json({ message: "Failed to schedule posts" });
+    }
+  });
+
+  app.get("/api/promotion/scheduled-posts", async (req, res) => {
+    try {
+      const posts = promotionService.getScheduledPosts();
+      res.json({ posts });
+    } catch (error) {
+      console.error("Failed to get scheduled posts:", error);
+      res.status(500).json({ message: "Failed to get scheduled posts" });
+    }
+  });
+
+  app.post("/api/promotion/viral-content", async (req, res) => {
+    try {
+      const content = await promotionService.generateViralContent();
+      res.json(content);
+    } catch (error) {
+      console.error("Viral content generation failed:", error);
+      res.status(500).json({ message: "Failed to generate viral content" });
     }
   });
 

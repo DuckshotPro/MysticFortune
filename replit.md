@@ -4,6 +4,10 @@
 A comprehensive fortune telling web application that provides users with mystical insights through multiple divination methods including Crystal Ball readings, Daily Horoscopes, and Tarot Card spreads. The application features a dark mystical theme with purple and golden accents, creating an authentic spiritual experience.
 
 ## Recent Changes
+- **June 2025**: Added AI image generation system using Hugging Face API for mystical artwork
+- **June 2025**: Implemented automated promotion system with social media content generation
+- **June 2025**: Created viral content creator with platform-specific optimizations
+- **June 2025**: Integrated AI artwork generator into premium features
 - **June 2025**: Migrated from in-memory storage to PostgreSQL database using Neon backend
 - **June 2025**: Implemented full database schema with proper relations for users, fortunes, horoscopes, and saved fortunes
 - **June 2025**: Added comprehensive database seeding with 15 unique fortunes and 12 detailed horoscopes
@@ -20,16 +24,20 @@ A comprehensive fortune telling web application that provides users with mystica
 ## Architecture
 ### Frontend (React + TypeScript)
 - **Fortune Components**: Crystal Ball, Horoscope Section, Tarot Cards with enhanced animations
+- **AI Features**: Mystical artwork generator with Hugging Face integration
+- **Promotion Tools**: Automated social media content creation and scheduling
 - **Monetization**: Ad banners, premium subscription pages, Stripe checkout integration
 - **Content Generation**: Dynamic fortune generation, seasonal variations, premium extensions
 - **Sharing System**: Social media integration with tracking, visual fortune cards
 
 ### Backend (Express + TypeScript)
 - **Database**: PostgreSQL with Neon backend for reliable data persistence
+- **AI Services**: Hugging Face integration for mystical artwork generation
+- **Promotion Engine**: Automated social media content creation and viral optimization
 - **Storage**: DatabaseStorage class with full CRUD operations for all entities
 - **Schema**: Drizzle ORM with proper table relations and type safety
 - **Content**: 15 unique fortunes across categories, 12 complete horoscope profiles with ratings
-- **API Routes**: Enhanced fortune retrieval with database querying and seasonal context
+- **API Routes**: Enhanced fortune retrieval, AI image generation, promotion management
 
 ### Enhanced Content Features
 - **Seasonal Fortunes**: Spring, Summer, Autumn, Winter themed content
