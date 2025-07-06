@@ -1,7 +1,7 @@
 # AI-Powered Mystic Fortune Development Roadmap
 
 ## Phase 1: Core AI Features (Priority: HIGH)
-**Timeline: 2-3 weeks | Development Cost: $3,000-5,000**
+**Timeline: 2-3 weeks | Replit Development: Included in credits**
 
 ### 1.1 Personalized Fortune AI
 - **User Profile System**: Birth date, preferences, reading history
@@ -140,13 +140,13 @@
 
 ## Budget Summary
 
-| Phase | Features | Timeline | Cost Range |
-|-------|----------|----------|------------|
-| Phase 1 | Personalized Fortune + AI Tarot | 2-3 weeks | $3,000-5,000 |
-| Phase 2 | Enhanced Promotion AI | 2-3 weeks | $4,000-6,000 |
-| Phase 3 | Smart Analytics | 3-4 weeks | $5,000-8,000 |
-| Phase 4 | Advanced Features | 4-5 weeks | $6,000-10,000 |
-| **Total** | **Complete AI Suite** | **11-15 weeks** | **$18,000-29,000** |
+| Phase | Features | Timeline | Replit Cost | API Costs |
+|-------|----------|----------|-------------|-----------|
+| Phase 1 | Personalized Fortune + AI Tarot | 2-3 weeks | Credits only | $50-100/month |
+| Phase 2 | Enhanced Promotion AI | 2-3 weeks | Credits only | $100-200/month |
+| Phase 3 | Smart Analytics | 3-4 weeks | Credits only | $50-100/month |
+| Phase 4 | Advanced Features | 4-5 weeks | Credits only | $200-400/month |
+| **Total** | **Complete AI Suite** | **11-15 weeks** | **Replit Credits** | **$400-800/month** |
 
 ### Monthly Operating Costs
 - **OpenAI API**: $500-1,000/month
