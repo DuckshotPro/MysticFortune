@@ -37,6 +37,17 @@ export const horoscopes = pgTable("horoscopes", {
   date: timestamp("date").notNull().defaultNow(),
 });
 
+export const userProfiles = pgTable("user_profiles", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  birthDate: timestamp("birth_date"),
+  preferences: text("preferences").array(),
+  readingHistory: text("reading_history").array(),
+  favoriteCategories: text("favorite_categories").array(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -65,6 +76,14 @@ export const insertHoroscopeSchema = createInsertSchema(horoscopes).pick({
   compatibleSign: true,
 });
 
+export const insertUserProfileSchema = createInsertSchema(userProfiles).pick({
+  userId: true,
+  birthDate: true,
+  preferences: true,
+  readingHistory: true,
+  favoriteCategories: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 
@@ -76,6 +95,9 @@ export type SavedFortune = typeof savedFortunes.$inferSelect;
 
 export type InsertHoroscope = z.infer<typeof insertHoroscopeSchema>;
 export type Horoscope = typeof horoscopes.$inferSelect;
+
+export type InsertUserProfile = z.infer<typeof insertUserProfileSchema>;
+export type UserProfile = typeof userProfiles.$inferSelect;
 
 export const FortuneCategory = {
   LOVE: "love",

@@ -4,6 +4,11 @@
 A comprehensive fortune telling web application that provides users with mystical insights through multiple divination methods including Crystal Ball readings, Daily Horoscopes, and Tarot Card spreads. The application features a dark mystical theme with purple and golden accents, creating an authentic spiritual experience.
 
 ## Recent Changes
+- **July 2025**: **Phase 1 AI Features Complete** - Added personalized fortune generation and AI tarot readings using Hugging Face text models
+- **July 2025**: Extended AI service with text generation capabilities using DialoGPT for fortune personalization
+- **July 2025**: Implemented zodiac sign detection from birth dates for cosmic personalization
+- **July 2025**: Added user profile schema with preferences, reading history, and favorite categories
+- **July 2025**: Created AI API endpoints for personalized fortunes and tarot interpretations
 - **June 2025**: Added AI image generation system using Hugging Face API for mystical artwork
 - **June 2025**: Implemented automated promotion system with social media content generation
 - **June 2025**: Created viral content creator with platform-specific optimizations

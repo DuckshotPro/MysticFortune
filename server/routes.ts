@@ -393,6 +393,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Personalized AI Fortune Routes
+  app.post("/api/personalized-fortune", async (req, res) => {
+    try {
+      const { category, userId, birthDate, preferences } = req.body;
+      
+      const userProfile = {
+        birthDate: birthDate ? new Date(birthDate) : undefined,
+        preferences: preferences || [],
+        readingHistory: [],
+        favoriteCategories: []
+      };
+
+      const personalizedFortune = await aiImageService.generatePersonalizedFortune(category, userProfile);
+      
+      res.json(personalizedFortune);
+    } catch (error) {
+      console.error("Personalized fortune generation failed:", error);
+      res.status(500).json({ message: "Failed to generate personalized fortune" });
+    }
+  });
+
+  // AI Tarot Reading Routes
+  app.post("/api/ai-tarot-reading", async (req, res) => {
+    try {
+      const { cardName, userQuestion, userId, birthDate } = req.body;
+      
+      const userProfile = {
+        birthDate: birthDate ? new Date(birthDate) : undefined,
+        preferences: [],
+        readingHistory: [],
+        favoriteCategories: []
+      };
+
+      const tarotInterpretation = await aiImageService.generateTarotInterpretation(cardName, userQuestion, userProfile);
+      
+      res.json(tarotInterpretation);
+    } catch (error) {
+      console.error("AI tarot reading failed:", error);
+      res.status(500).json({ message: "Failed to generate tarot reading" });
+    }
+  });
+
   // AI Image Generation Routes
   app.post("/api/premium/generate-artwork", async (req, res) => {
     try {
