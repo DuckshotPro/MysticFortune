@@ -1,4 +1,5 @@
 import { aiImageService } from "./aiImageService";
+import { trendAnalyzer } from "./trendAnalyzer";
 import { storage } from "./storage";
 import { FortuneCategory, type FortuneCategoryType } from "@shared/schema";
 import fs from "fs/promises";
@@ -16,6 +17,9 @@ interface SocialMediaPost {
     shares: number;
     comments: number;
   };
+  viralScore?: number;
+  isABTest?: boolean;
+  originalPostId?: string;
 }
 
 interface PromotionalContent {
@@ -126,7 +130,7 @@ class PromotionService {
     };
   }
 
-  async scheduleAutomatedPosts(frequency: 'daily' | 'weekly' = 'daily'): Promise<SocialMediaPost[]> {
+  async scheduleOptimizedPosts(frequency: 'daily' | 'weekly' = 'daily'): Promise<SocialMediaPost[]> {
     const scheduledPosts: SocialMediaPost[] = [];
     const platforms = ['instagram', 'twitter', 'facebook', 'tiktok'];
     const categories = [FortuneCategory.LOVE, FortuneCategory.CAREER, FortuneCategory.GENERAL];

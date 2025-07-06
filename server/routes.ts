@@ -495,7 +495,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/promotion/schedule-posts", async (req, res) => {
     try {
       const { frequency } = req.body;
-      const posts = await promotionService.scheduleAutomatedPosts(frequency);
+      const posts = await promotionService.scheduleOptimizedPosts(frequency);
       res.json({ scheduledPosts: posts });
     } catch (error) {
       console.error("Post scheduling failed:", error);
