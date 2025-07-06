@@ -7,13 +7,13 @@
 - **User Profile System**: Birth date, preferences, reading history
 - **AI Fortune Generator**: Context-aware fortunes based on user data
 - **Learning Algorithm**: Improves recommendations over time
-- **Technical Stack**: OpenAI GPT-4o with custom prompts, user preference database
+- **Technical Stack**: Hugging Face text generation models (GPT-2, FLAN-T5), user preference database
 
 ### 1.2 AI Tarot Reader
 - **Smart Card Interpretations**: Combines traditional meanings with AI insights
 - **Contextual Readings**: Considers user questions and card positions
 - **Advanced Spreads**: Celtic Cross, Past-Present-Future with AI narration
-- **Technical Stack**: Tarot database + OpenAI for personalized interpretations
+- **Technical Stack**: Tarot database + Hugging Face text generation for personalized interpretations
 
 **Phase 1 Deliverables:**
 - Personalized fortune generation API
@@ -113,8 +113,8 @@
 ## Implementation Strategy
 
 ### Technical Requirements
-- **OpenAI API**: GPT-4o for content generation ($500-1000/month)
-- **Computer Vision**: For aura reading and image analysis
+- **Hugging Face API**: Text generation models (free tier + paid scaling)
+- **Computer Vision**: For aura reading and image analysis (existing)
 - **Social Media APIs**: Twitter, Instagram, TikTok integration
 - **Analytics Platform**: Advanced user behavior tracking
 - **Database Scaling**: Enhanced PostgreSQL with AI data storage
@@ -142,17 +142,17 @@
 
 | Phase | Features | Timeline | Replit Cost | API Costs |
 |-------|----------|----------|-------------|-----------|
-| Phase 1 | Personalized Fortune + AI Tarot | 2-3 weeks | Credits only | $50-100/month |
+| Phase 1 | Personalized Fortune + AI Tarot | 2-3 weeks | Credits only | $0-50/month |
 | Phase 2 | Enhanced Promotion AI | 2-3 weeks | Credits only | $100-200/month |
 | Phase 3 | Smart Analytics | 3-4 weeks | Credits only | $50-100/month |
 | Phase 4 | Advanced Features | 4-5 weeks | Credits only | $200-400/month |
-| **Total** | **Complete AI Suite** | **11-15 weeks** | **Replit Credits** | **$400-800/month** |
+| **Total** | **Complete AI Suite** | **11-15 weeks** | **Replit Credits** | **$300-700/month** |
 
 ### Monthly Operating Costs
-- **OpenAI API**: $500-1,000/month
+- **Hugging Face API**: $0-100/month (free tier available)
 - **Social Media APIs**: $200-500/month
 - **Analytics Platform**: $100-300/month
-- **Total Monthly**: $800-1,800/month
+- **Total Monthly**: $300-900/month
 
 ---
 
