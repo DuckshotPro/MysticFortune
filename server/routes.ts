@@ -5,12 +5,18 @@ import Stripe from "stripe";
 import { storage } from "./storage";
 import { aiImageService } from "./aiImageService";
 import { promotionService } from "./promotionService";
+import { trendAnalyzer } from "./trendAnalyzer";
+import { analyticsService } from "./analyticsService";
 import { 
   insertFortuneSchema, 
   insertSavedFortuneSchema, 
   insertHoroscopeSchema,
+  insertUserSessionSchema,
+  insertUserInteractionSchema,
+  insertContentEngagementSchema,
   FortuneCategory,
-  ZodiacSigns
+  ZodiacSigns,
+  type FortuneCategoryType
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -520,6 +526,104 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Viral content generation failed:", error);
       res.status(500).json({ message: "Failed to generate viral content" });
+    }
+  });
+
+  // Phase 3: Enhanced Analytics Routes
+  app.post("/api/analytics/session/start", async (req, res) => {
+    try {
+      const sessionData = req.body;
+      const session = await analyticsService.startSession(sessionData);
+      res.json({ session });
+    } catch (error) {
+      console.error("Failed to start session:", error);
+      res.status(500).json({ message: "Failed to start session" });
+    }
+  });
+
+  app.post("/api/analytics/session/end", async (req, res) => {
+    try {
+      const { sessionId } = req.body;
+      await analyticsService.endSession(sessionId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Failed to end session:", error);
+      res.status(500).json({ message: "Failed to end session" });
+    }
+  });
+
+  app.post("/api/analytics/interaction", async (req, res) => {
+    try {
+      const interaction = insertUserInteractionSchema.parse(req.body);
+      const tracked = await analyticsService.trackInteraction(interaction);
+      res.json({ interaction: tracked });
+    } catch (error) {
+      console.error("Failed to track interaction:", error);
+      res.status(500).json({ message: "Failed to track interaction" });
+    }
+  });
+
+  app.post("/api/analytics/engagement", async (req, res) => {
+    try {
+      const engagement = insertContentEngagementSchema.parse(req.body);
+      const tracked = await analyticsService.trackContentEngagement(engagement);
+      res.json({ engagement: tracked });
+    } catch (error) {
+      console.error("Failed to track engagement:", error);
+      res.status(500).json({ message: "Failed to track engagement" });
+    }
+  });
+
+  app.get("/api/analytics/behavior/:timeframe", async (req, res) => {
+    try {
+      const { timeframe } = req.params;
+      const metrics = await analyticsService.getUserBehaviorMetrics(timeframe as 'day' | 'week' | 'month');
+      res.json(metrics);
+    } catch (error) {
+      console.error("Failed to get behavior metrics:", error);
+      res.status(500).json({ message: "Failed to get behavior metrics" });
+    }
+  });
+
+  app.get("/api/analytics/content/:contentType?", async (req, res) => {
+    try {
+      const { contentType } = req.params;
+      const performance = await analyticsService.getContentPerformance(contentType);
+      res.json(performance);
+    } catch (error) {
+      console.error("Failed to get content performance:", error);
+      res.status(500).json({ message: "Failed to get content performance" });
+    }
+  });
+
+  app.get("/api/analytics/platforms", async (req, res) => {
+    try {
+      const analytics = await analyticsService.getPlatformAnalytics();
+      res.json(analytics);
+    } catch (error) {
+      console.error("Failed to get platform analytics:", error);
+      res.status(500).json({ message: "Failed to get platform analytics" });
+    }
+  });
+
+  app.get("/api/analytics/live", async (req, res) => {
+    try {
+      const metrics = await analyticsService.getLiveMetrics();
+      res.json(metrics);
+    } catch (error) {
+      console.error("Failed to get live metrics:", error);
+      res.status(500).json({ message: "Failed to get live metrics" });
+    }
+  });
+
+  app.get("/api/analytics/ab-test/:testName", async (req, res) => {
+    try {
+      const { testName } = req.params;
+      const results = await analyticsService.getAbTestResults(testName);
+      res.json(results);
+    } catch (error) {
+      console.error("Failed to get A/B test results:", error);
+      res.status(500).json({ message: "Failed to get A/B test results" });
     }
   });
 
