@@ -66,7 +66,9 @@ A comprehensive fortune telling web application that provides users with mystica
 - **Weekly Previews**: Premium feature showing week's cosmic themes
 
 ## User Preferences
-*No specific preferences documented yet*
+- **AI Technology**: Use Hugging Face API for all AI services (cost-effective at $0-50/month vs $500+ for OpenAI)
+- **Documentation**: Maintain comprehensive README and AI features documentation
+- **Focus**: All three AI phases complete (personalized fortunes, viral marketing intelligence, comprehensive analytics)
 
 ## Content Generation Capabilities
 - 30+ unique fortunes per category (Love, Career, General)
