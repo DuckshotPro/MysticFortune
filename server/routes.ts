@@ -458,12 +458,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Generate character image using AI service
-      const imageUrl = await aiImageService.generateCharacterImage(prompt, characterId, emotion);
+      const result = await aiImageService.generateCharacterImage(prompt, characterId, emotion);
 
       res.json({ 
-        imageUrl,
-        characterId,
-        emotion,
+        imageUrl: result.imageUrl,
+        characterId: result.characterId,
+        emotion: result.emotion,
         success: true 
       });
     } catch (error) {

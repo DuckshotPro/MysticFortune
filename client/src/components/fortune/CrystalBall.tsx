@@ -53,12 +53,10 @@ export function CrystalBall() {
   const [selectedCategory, setSelectedCategory] = useState<FortuneCategoryType>("love");
   const [showModal, setShowModal] = useState(false);
   const [currentFortune, setCurrentFortune] = useState<Fortune | null>(null);
+  const [selectedCharacter, setSelectedCharacter] = useState<string | null>(null);
+  const [showCharacterSelector, setShowCharacterSelector] = useState(false);
+  const [showDramaticReveal, setShowDramaticReveal] = useState(false);
   const { playSoundEffect, playFortuneMusic } = useSound();
-
-  const { data: fortune, isLoading, refetch } = useQuery({
-    queryKey: [`/api/fortunes/${selectedCategory}`],
-    enabled: false
-  });
 
   const saveFortuneMutation = useMutation({
     mutationFn: (fortune: Fortune) => {
@@ -71,15 +69,32 @@ export function CrystalBall() {
     }
   });
 
-  const handleRevealFortune = async () => {
+  const handleStartReading = () => {
+    playSoundEffect('cosmic-transition');
+    setShowCharacterSelector(true);
+  };
+
+  const handleCharacterSelect = (characterId: string | null) => {
+    setSelectedCharacter(characterId);
+  };
+
+  const handleRandomCharacterSelect = () => {
+    const randomCharacter = getRandomCharacter();
+    setSelectedCharacter(randomCharacter.id);
+  };
+
+  const handleBeginDramaticReading = () => {
     playSoundEffect('energy-pulse');
-    playFortuneMusic('crystal-ball');
-    const result = await refetch();
-    if (result.data) {
-      setCurrentFortune(result.data as Fortune);
-      setShowModal(true);
-      playSoundEffect('mystical-reveal');
-    }
+    playFortuneMusic('mystical-ambient');
+    setShowCharacterSelector(false);
+    setShowDramaticReveal(true);
+  };
+
+  const handleFortuneRevealed = (fortune: Fortune) => {
+    setCurrentFortune(fortune);
+    playSoundEffect('mystical-reveal');
+    setShowModal(true);
+    setShowDramaticReveal(false);
   };
 
   const handleSaveFortune = async () => {
@@ -90,6 +105,9 @@ export function CrystalBall() {
 
   const handleCloseModal = () => {
     setShowModal(false);
+    setSelectedCharacter(null);
+    setShowCharacterSelector(false);
+    setShowDramaticReveal(false);
   };
 
   return (
@@ -122,9 +140,9 @@ export function CrystalBall() {
               />
               <div className="text-center">
                 <p className="font-['Tangerine'] text-3xl text-amber-500 mb-2">
-                  {isLoading ? "Reading the stars..." : "Tap to Reveal"}
+                  {showCharacterSelector || showDramaticReveal ? "Reading the stars..." : "Choose Your Fortune Teller"}
                 </p>
-                {isLoading ? (
+                {showCharacterSelector || showDramaticReveal ? (
                   <Spinner className="text-amber-500" />
                 ) : (
                   <motion.div
@@ -190,10 +208,10 @@ export function CrystalBall() {
                 <p className="text-sm italic text-white/80 mb-4">Focus on your question as you reveal your fortune...</p>
                 <Button 
                   className="w-full bg-amber-500 hover:bg-amber-500/90 text-purple-950 py-6 rounded-full font-['Cinzel'] text-base font-bold transition-all transform hover:scale-105 flex items-center justify-center"
-                  onClick={handleRevealFortune}
-                  disabled={isLoading}
+                  onClick={handleStartReading}
+                  disabled={showCharacterSelector || showDramaticReveal}
                 >
-                  <FontAwesomeIcon icon={faMagic} className="mr-2" /> Reveal My Fortune
+                  <FontAwesomeIcon icon={faMagic} className="mr-2" /> Begin Mystical Reading
                 </Button>
               </div>
             </CardContent>
@@ -201,6 +219,33 @@ export function CrystalBall() {
         </div>
       </div>
 
+      {/* Character Selection Modal */}
+      <AnimatePresence>
+        {showCharacterSelector && (
+          <CharacterSelector
+            selectedCategory={selectedCategory}
+            onCharacterSelect={handleCharacterSelect}
+            onRandomSelect={handleRandomCharacterSelect}
+            onCancel={() => setShowCharacterSelector(false)}
+            onConfirm={handleBeginDramaticReading}
+            selectedCharacterId={selectedCharacter}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Dramatic Fortune Reveal */}
+      <AnimatePresence>
+        {showDramaticReveal && selectedCharacter && (
+          <DramaticFortuneReveal
+            characterId={selectedCharacter}
+            category={selectedCategory}
+            onFortuneRevealed={handleFortuneRevealed}
+            onCancel={() => setShowDramaticReveal(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Fortune Result Modal */}
       <AnimatePresence>
         {showModal && currentFortune && (
           <FortuneModal 

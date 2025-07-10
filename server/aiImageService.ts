@@ -286,6 +286,39 @@ class AIImageService {
     return basePrompts[category] || basePrompts.general;
   }
 
+  async generateCharacterImage(prompt: string, characterId: string, emotion: string): Promise<{
+    imageBuffer: Buffer;
+    imageUrl: string;
+    characterId: string;
+    emotion: string;
+  }> {
+    try {
+      const imageBuffer = await this.generateImage(prompt);
+      
+      // Save image to public directory for serving
+      const assetsDir = path.join(process.cwd(), "client", "public", "generated-characters");
+      if (!fs.existsSync(assetsDir)) {
+        fs.mkdirSync(assetsDir, { recursive: true });
+      }
+      
+      const timestamp = Date.now();
+      const filename = `${characterId}-${emotion}-${timestamp}.png`;
+      const filepath = path.join(assetsDir, filename);
+      
+      fs.writeFileSync(filepath, imageBuffer);
+      
+      return {
+        imageBuffer,
+        imageUrl: `/generated-characters/${filename}`,
+        characterId,
+        emotion
+      };
+    } catch (error) {
+      console.error("Error generating character image:", error);
+      throw new Error("Failed to generate character image");
+    }
+  }
+
   async generateMysticalArtwork(category: FortuneCategoryType): Promise<{
     imageBuffer: Buffer;
     prompt: string;
