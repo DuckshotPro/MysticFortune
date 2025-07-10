@@ -13,7 +13,6 @@ import {
   faLeaf, 
   faSnowflake, 
   faSun, 
-  faMaple,
   faEye,
   faHeart,
   faBriefcase
@@ -25,7 +24,7 @@ import { FortuneCategoryType } from "@shared/schema";
 const seasonIcons = {
   spring: faLeaf,
   summer: faSun,
-  autumn: faMaple,
+  autumn: faLeaf, // Using faLeaf for autumn as well since faMaple doesn't exist
   winter: faSnowflake
 };
 

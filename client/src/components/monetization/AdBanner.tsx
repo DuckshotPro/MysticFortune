@@ -11,7 +11,7 @@ interface AdBannerProps {
   showCloseButton?: boolean;
 }
 
-export function AdBanner({ variant = "footer", showCloseButton = true }: AdBannerProps) {
+function AdBanner({ variant = "footer", showCloseButton = true }: AdBannerProps) {
   const [isVisible, setIsVisible] = useState(true);
   const { toast } = useToast();
   const [, navigate] = useLocation();
@@ -172,3 +172,6 @@ export function AdBanner({ variant = "footer", showCloseButton = true }: AdBanne
     </motion.div>
   );
 }
+
+export default AdBanner;
+export { AdBanner };

@@ -8,7 +8,7 @@ import { faCrown, faCalendarWeek, faStar } from "@fortawesome/free-solid-svg-ico
 import { getWeeklyPreview, getDayTheme } from "@/lib/contentRotation";
 import { hasPremiumAccess } from "@/lib/premiumUtils";
 
-export function WeeklyPreview() {
+function WeeklyPreview() {
   const [showPreview, setShowPreview] = useState(false);
   const weeklyData = getWeeklyPreview();
   const todayTheme = getDayTheme();
@@ -109,3 +109,5 @@ export function WeeklyPreview() {
     </motion.div>
   );
 }
+
+export default WeeklyPreview;
