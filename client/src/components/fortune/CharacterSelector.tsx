@@ -8,12 +8,22 @@ import { Shuffle, Heart } from "lucide-react";
 import { characterArchetypes, FortuneTellerCharacter } from "@/lib/fortuneTellerCharacters";
 
 interface CharacterSelectorProps {
-  selectedCharacter: string | null;
+  selectedCategory: string;
   onCharacterSelect: (characterId: string | null) => void;
   onRandomSelect: () => void;
+  onCancel: () => void;
+  onConfirm: () => void;
+  selectedCharacterId: string | null;
 }
 
-export default function CharacterSelector({ selectedCharacter, onCharacterSelect, onRandomSelect }: CharacterSelectorProps) {
+export default function CharacterSelector({ 
+  selectedCategory, 
+  onCharacterSelect, 
+  onRandomSelect, 
+  onCancel, 
+  onConfirm, 
+  selectedCharacterId 
+}: CharacterSelectorProps) {
   const [favorites, setFavorites] = useState<string[]>([]);
 
   const toggleFavorite = (characterId: string) => {
@@ -25,7 +35,19 @@ export default function CharacterSelector({ selectedCharacter, onCharacterSelect
   };
 
   return (
-    <div className="space-y-6">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+    >
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        className="bg-gradient-to-br from-purple-900 to-indigo-900 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 border border-purple-500/30"
+      >
+        <div className="space-y-6">
       <div className="text-center space-y-4">
         <h3 className="text-2xl font-['Cinzel'] text-amber-400">
           Choose Your Mystical Guide
@@ -44,7 +66,7 @@ export default function CharacterSelector({ selectedCharacter, onCharacterSelect
             Surprise Me
           </Button>
           
-          {selectedCharacter && (
+          {selectedCharacterId && (
             <Button
               onClick={() => onCharacterSelect(null)}
               variant="ghost"
@@ -65,7 +87,7 @@ export default function CharacterSelector({ selectedCharacter, onCharacterSelect
           >
             <Card 
               className={`cursor-pointer transition-all duration-300 ${
-                selectedCharacter === character.id
+                selectedCharacterId === character.id
                   ? 'bg-gradient-to-br from-purple-800/60 to-pink-800/60 border-amber-500 shadow-lg shadow-amber-500/25'
                   : 'bg-gradient-to-br from-purple-900/30 to-indigo-900/30 border-purple-500/30 hover:border-purple-400/50'
               }`}
@@ -104,7 +126,7 @@ export default function CharacterSelector({ selectedCharacter, onCharacterSelect
                     />
                   </Button>
                   
-                  {selectedCharacter === character.id && (
+                  {selectedCharacterId === character.id && (
                     <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
@@ -131,7 +153,7 @@ export default function CharacterSelector({ selectedCharacter, onCharacterSelect
                 </div>
 
                 {/* Selection Indicator */}
-                {selectedCharacter === character.id && (
+                {selectedCharacterId === character.id && (
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
@@ -155,6 +177,26 @@ export default function CharacterSelector({ selectedCharacter, onCharacterSelect
           </p>
         </div>
       )}
+
+      {/* Action Buttons */}
+      <div className="flex justify-center space-x-4 pt-6 border-t border-purple-500/30">
+        <Button
+          onClick={onCancel}
+          variant="outline"
+          className="border-purple-500/50 text-purple-300 hover:text-purple-100"
+        >
+          Cancel
+        </Button>
+        <Button
+          onClick={onConfirm}
+          disabled={!selectedCharacterId}
+          className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white disabled:opacity-50"
+        >
+          Begin Reading with {selectedCharacterId ? characterArchetypes.find(c => c.id === selectedCharacterId)?.name : 'Selected'} Oracle
+        </Button>
+      </div>
     </div>
+      </motion.div>
+    </motion.div>
   );
 }
