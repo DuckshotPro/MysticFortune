@@ -174,4 +174,3 @@ function AdBanner({ variant = "footer", showCloseButton = true }: AdBannerProps)
 }
 
 export default AdBanner;
-export { AdBanner };

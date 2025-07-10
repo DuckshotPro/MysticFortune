@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,17 +12,9 @@ import CharacterSelector from "./CharacterSelector";
 import { useToast } from "@/hooks/use-toast";
 import { useSound } from "@/hooks/useSound";
 import { getRandomCharacter } from "@/lib/fortuneTellerCharacters";
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { FortuneModal } from "./FortuneModal";
-import { FortuneCategoryType, Fortune } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { Spinner } from "@/components/ui/spinner";
 import { float, spin } from "@/lib/animations";
-import { useSound } from "@/hooks/useSound";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { 
   faHeart, 
@@ -220,3 +213,5 @@ export function CrystalBall() {
     </section>
   );
 }
+
+export default CrystalBall;
