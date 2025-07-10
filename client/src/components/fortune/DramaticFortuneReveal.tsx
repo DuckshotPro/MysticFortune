@@ -9,12 +9,13 @@ import { useToast } from "@/hooks/use-toast";
 import { FortuneTellerCharacter, generateCharacterPrompt, selectEmotionForFortune, getCharacterById, getRandomCharacter } from "@/lib/fortuneTellerCharacters";
 
 interface DramaticFortuneRevealProps {
+  characterId: string;
   category: FortuneCategoryType;
   onFortuneRevealed: (fortune: Fortune) => void;
-  selectedCharacter?: string;
+  onCancel: () => void;
 }
 
-export default function DramaticFortuneReveal({ category, onFortuneRevealed, selectedCharacter }: DramaticFortuneRevealProps) {
+export default function DramaticFortuneReveal({ characterId, category, onFortuneRevealed, onCancel }: DramaticFortuneRevealProps) {
   const [phase, setPhase] = useState<'idle' | 'building' | 'channeling' | 'revealing' | 'complete'>('idle');
   const [character, setCharacter] = useState<FortuneTellerCharacter | null>(null);
   const [characterImage, setCharacterImage] = useState<string>('');
@@ -22,6 +23,13 @@ export default function DramaticFortuneReveal({ category, onFortuneRevealed, sel
   const [buildupText, setBuildupText] = useState('');
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const { toast } = useToast();
+
+  // Auto-start the fortune telling when component mounts
+  useEffect(() => {
+    if (phase === 'idle') {
+      startFortuneTelling();
+    }
+  }, []);
 
   const buildupMessages = [
     "The cosmic energies are aligning...",
@@ -37,7 +45,7 @@ export default function DramaticFortuneReveal({ category, onFortuneRevealed, sel
     setPhase('building');
     
     // Select character
-    const selectedChar = selectedCharacter ? getCharacterById(selectedCharacter) : getRandomCharacter();
+    const selectedChar = getCharacterById(characterId);
     if (!selectedChar) return;
     
     setCharacter(selectedChar);

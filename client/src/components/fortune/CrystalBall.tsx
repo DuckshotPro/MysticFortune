@@ -70,8 +70,13 @@ export function CrystalBall() {
   });
 
   const handleStartReading = () => {
-    playSoundEffect('cosmic-transition');
-    setShowCharacterSelector(true);
+    playSoundEffect('energy-pulse');
+    playFortuneMusic('mystical-ambient');
+    
+    // Go directly to dramatic reveal with random character - one-click experience
+    const randomCharacter = getRandomCharacter();
+    setSelectedCharacter(randomCharacter.id);
+    setShowDramaticReveal(true);
   };
 
   const handleCharacterSelect = (characterId: string | null) => {
