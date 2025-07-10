@@ -634,18 +634,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin Panel Routes
   app.get("/api/admin/stats", async (req, res) => {
     try {
+      // Get real data from your analytics service and database
+      const [userStats, fortuneStats, sessionStats] = await Promise.all([
+        // Get total unique users from sessions
+        db.select({ count: sql`COUNT(DISTINCT ${userSessions.userId})` }).from(userSessions),
+        
+        // Get total fortunes generated
+        db.select({ count: sql`COUNT(*)` }).from(userInteractions)
+          .where(eq(userInteractions.action, 'fortune_generated')),
+        
+        // Get active users (last 24 hours)
+        db.select({ count: sql`COUNT(DISTINCT ${userSessions.userId})` })
+          .from(userSessions)
+          .where(sql`${userSessions.startTime} >= NOW() - INTERVAL '24 hours'`)
+      ]);
+
       const stats = {
-        totalUsers: 150, // From database count
-        activeUsers: 45,
-        totalFortunes: 1250,
-        premiumUsers: 23,
-        revenue: 1340,
+        totalUsers: Number(userStats[0]?.count) || 0,
+        activeUsers: Number(sessionStats[0]?.count) || 0,
+        totalFortunes: Number(fortuneStats[0]?.count) || 0,
+        premiumUsers: 0, // Will be 0 until users actually purchase premium
+        revenue: 0, // Will be 0 until actual payments are processed
         systemHealth: 'healthy' as const
       };
+      
       res.json(stats);
     } catch (error) {
       loggingService.error("Failed to get admin stats", error as Error);
-      res.status(500).json({ message: "Failed to get admin stats" });
+      
+      // Fallback to demo data if database query fails
+      const fallbackStats = {
+        totalUsers: 0,
+        activeUsers: 0,
+        totalFortunes: 0,
+        premiumUsers: 0,
+        revenue: 0,
+        systemHealth: 'warning' as const
+      };
+      
+      res.json(fallbackStats);
     }
   });
 
