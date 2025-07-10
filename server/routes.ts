@@ -35,6 +35,24 @@ if (!process.env.PAYPAL_CLIENT_ID || !process.env.PAYPAL_CLIENT_SECRET) {
   console.warn('Missing PayPal environment variables. PayPal features will be available in demo mode.');
 }
 
+// JWT token verification middleware
+function verifyAdminToken(req: any, res: any, next: any) {
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(' ')[1];
+  
+  if (!token) {
+    return res.status(401).json({ message: 'Access denied. No token provided.' });
+  }
+  
+  // Simple token verification (in production, use proper JWT)
+  const validToken = process.env.ADMIN_TOKEN || 'mystic-admin-2025';
+  if (token !== validToken) {
+    return res.status(403).json({ message: 'Invalid token.' });
+  }
+  
+  next();
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Add logging middleware
   app.use(requestLoggingMiddleware);
@@ -43,6 +61,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Prefix all routes with /api
   app.use("/api", router);
+  
+  // Admin authentication routes
+  router.post("/admin/login", async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      // Simple hardcoded admin credentials (in production, use proper hashing)
+      const adminUsername = process.env.ADMIN_USERNAME || 'admin';
+      const adminPassword = process.env.ADMIN_PASSWORD || 'mystic2025';
+      
+      if (username === adminUsername && password === adminPassword) {
+        const token = process.env.ADMIN_TOKEN || 'mystic-admin-2025';
+        loggingService.info(`Admin login successful: ${username}`);
+        res.json({ token, success: true });
+      } else {
+        loggingService.warn(`Failed admin login attempt: ${username}`);
+        res.status(401).json({ message: 'Invalid credentials' });
+      }
+    } catch (error) {
+      loggingService.error("Admin login error", error as Error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+  
+  router.get("/admin/verify", verifyAdminToken, async (req, res) => {
+    res.json({ valid: true });
+  });
   
   // Get random fortune by category
   router.get("/fortunes/:category", async (req, res) => {
@@ -631,8 +676,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Admin Panel Routes
-  app.get("/api/admin/stats", async (req, res) => {
+  // Admin Panel Routes (protected)
+  router.get("/admin/stats", verifyAdminToken, async (req, res) => {
     try {
       // Get real data from your analytics service and database
       const [userStats, fortuneStats, sessionStats] = await Promise.all([
@@ -676,7 +721,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/admin/users", async (req, res) => {
+  router.get("/admin/users", verifyAdminToken, async (req, res) => {
     try {
       const users = await storage.getAllUsers(); // You'll need to add this method
       res.json(users);
@@ -686,7 +731,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/admin/content", async (req, res) => {
+  router.get("/admin/content", verifyAdminToken, async (req, res) => {
     try {
       const content = {
         love: { count: 15 },
@@ -703,7 +748,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/admin/logs", async (req, res) => {
+  router.get("/admin/logs", verifyAdminToken, async (req, res) => {
     try {
       const logs = await loggingService.getRecentLogs(24);
       res.json(logs);
@@ -713,7 +758,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/admin/promotions", async (req, res) => {
+  router.get("/admin/promotions", verifyAdminToken, async (req, res) => {
     try {
       const promotions = [
         {
@@ -736,7 +781,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/generate-ad", async (req, res) => {
+  router.post("/admin/generate-ad", verifyAdminToken, async (req, res) => {
     try {
       const { adType } = req.body;
       loggingService.info(`Generating self-promotion ad: ${adType}`);

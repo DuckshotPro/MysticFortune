@@ -42,7 +42,12 @@ function AdminOverview() {
   const { data: stats, isLoading } = useQuery({
     queryKey: ['admin', 'stats'],
     queryFn: async () => {
-      const response = await fetch('/api/admin/stats');
+      const token = localStorage.getItem('admin_token');
+      const response = await fetch('/api/admin/stats', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       if (!response.ok) throw new Error('Failed to fetch admin stats');
       return response.json() as AdminStats;
     },
@@ -117,7 +122,12 @@ function UserManagement() {
   const { data: users, isLoading } = useQuery({
     queryKey: ['admin', 'users'],
     queryFn: async () => {
-      const response = await fetch('/api/admin/users');
+      const token = localStorage.getItem('admin_token');
+      const response = await fetch('/api/admin/users', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       if (!response.ok) throw new Error('Failed to fetch users');
       return response.json();
     }
@@ -165,7 +175,12 @@ function ContentManagement() {
   const { data: content, isLoading } = useQuery({
     queryKey: ['admin', 'content'],
     queryFn: async () => {
-      const response = await fetch('/api/admin/content');
+      const token = localStorage.getItem('admin_token');
+      const response = await fetch('/api/admin/content', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       if (!response.ok) throw new Error('Failed to fetch content');
       return response.json();
     }
@@ -225,7 +240,12 @@ function SystemLogs() {
   const { data: logs, isLoading } = useQuery({
     queryKey: ['admin', 'logs'],
     queryFn: async () => {
-      const response = await fetch('/api/admin/logs');
+      const token = localStorage.getItem('admin_token');
+      const response = await fetch('/api/admin/logs', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       if (!response.ok) throw new Error('Failed to fetch logs');
       return response.json();
     },
@@ -280,9 +300,13 @@ function PromotionManager() {
   
   const generateAd = useMutation({
     mutationFn: async (adType: string) => {
+      const token = localStorage.getItem('admin_token');
       const response = await fetch('/api/admin/generate-ad', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ adType })
       });
       if (!response.ok) throw new Error('Failed to generate ad');
@@ -296,7 +320,12 @@ function PromotionManager() {
   const { data: promotions } = useQuery({
     queryKey: ['admin', 'promotions'],
     queryFn: async () => {
-      const response = await fetch('/api/admin/promotions');
+      const token = localStorage.getItem('admin_token');
+      const response = await fetch('/api/admin/promotions', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       if (!response.ok) throw new Error('Failed to fetch promotions');
       return response.json();
     }
@@ -370,7 +399,11 @@ function PromotionManager() {
   );
 }
 
-export default function AdminDashboard() {
+interface AdminDashboardProps {
+  onLogout?: () => void;
+}
+
+export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   return (
     <div className="container mx-auto p-6 bg-gradient-to-br from-purple-950 via-indigo-950 to-purple-950 min-h-screen">
       <motion.div
@@ -387,9 +420,16 @@ export default function AdminDashboard() {
               Complete management console for Mystic Fortune platform
             </p>
           </div>
-          <Badge variant="outline" className="bg-green-500/20 text-green-400">
-            System Online
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="bg-green-500/20 text-green-400">
+              System Online
+            </Badge>
+            {onLogout && (
+              <Button variant="outline" size="sm" onClick={onLogout} className="text-red-400 border-red-400/50">
+                Logout
+              </Button>
+            )}
+          </div>
         </div>
 
         <AdminOverview />
