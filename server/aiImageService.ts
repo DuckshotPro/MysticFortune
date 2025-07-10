@@ -1,4 +1,6 @@
-import { type FortuneCategoryType } from "@shared/schema";
+import { FortuneCategoryType, UserProfile } from "@shared/schema";
+import fs from 'fs';
+import path from 'path';
 
 interface HuggingFaceImageResponse {
   blob: () => Promise<Blob>;
@@ -166,14 +168,14 @@ class AIImageService {
   }> {
     const zodiacSign = this.getZodiacSign(userProfile.birthDate);
     const preferences = userProfile.preferences?.join(", ") || "general guidance";
-    
+
     const personalizedPrompt = `Generate a personalized ${category} fortune for someone born under ${zodiacSign} who values ${preferences}. Focus on spiritual insights and positive guidance.`;
-    
+
     const aiContent = await this.generateText(personalizedPrompt);
-    
+
     // Enhance with personalized elements
     const personalizedContent = this.enhanceWithPersonalization(aiContent, userProfile, category);
-    
+
     return {
       content: personalizedContent.content,
       title: personalizedContent.title,
@@ -183,10 +185,10 @@ class AIImageService {
 
   private getZodiacSign(birthDate?: Date): string {
     if (!birthDate) return "the cosmos";
-    
+
     const month = birthDate.getMonth() + 1;
     const day = birthDate.getDate();
-    
+
     const signs = [
       { name: "Capricorn", start: [12, 22], end: [1, 19] },
       { name: "Aquarius", start: [1, 20], end: [2, 18] },
@@ -205,12 +207,12 @@ class AIImageService {
     for (const sign of signs) {
       const [startMonth, startDay] = sign.start;
       const [endMonth, endDay] = sign.end;
-      
+
       if ((month === startMonth && day >= startDay) || (month === endMonth && day <= endDay)) {
         return sign.name;
       }
     }
-    
+
     return "the cosmos";
   }
 
@@ -227,7 +229,7 @@ class AIImageService {
     };
 
     const personalizationNote = `Personalized for ${zodiacSign} energy`;
-    
+
     // If AI content is too short, enhance with fallback
     let enhancedContent = aiContent;
     if (aiContent.length < 50) {
@@ -249,9 +251,9 @@ class AIImageService {
   }> {
     const zodiacSign = this.getZodiacSign(userProfile.birthDate);
     const prompt = `Interpret the tarot card "${cardName}" for someone born under ${zodiacSign} asking "${userQuestion}". Provide spiritual guidance and actionable advice.`;
-    
+
     const aiInterpretation = await this.generateText(prompt);
-    
+
     return {
       interpretation: aiInterpretation || `The ${cardName} card speaks to your current situation with profound wisdom.`,
       personalMessage: `For ${zodiacSign} energy, this card represents a time of spiritual growth and transformation.`,
@@ -291,7 +293,7 @@ class AIImageService {
   }> {
     const prompts = this.getMysticalPrompts(category);
     const selectedPrompt = prompts[Math.floor(Math.random() * prompts.length)];
-    
+
     // Add quality enhancers
     const enhancedPrompt = `${selectedPrompt}, high quality, detailed, beautiful, artistic, professional photography, soft lighting, elegant pose`;
 

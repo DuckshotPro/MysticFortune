@@ -1,4 +1,17 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Loader2, Sparkles, Users, Shuffle } from "lucide-react";
+import { Fortune, FortuneCategoryType } from "@shared/schema";
+import { FortuneModal } from "./FortuneModal";
+import DramaticFortuneReveal from "./DramaticFortuneReveal";
+import CharacterSelector from "./CharacterSelector";
+import { useToast } from "@/hooks/use-toast";
+import { useSound } from "@/hooks/useSound";
+import { getRandomCharacter } from "@/lib/fortuneTellerCharacters";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -43,7 +56,7 @@ const CategoryButton = ({ category, label, icon, isSelected, onClick }: Category
   );
 };
 
-export default function CrystalBall() {
+export function CrystalBall() {
   const [selectedCategory, setSelectedCategory] = useState<FortuneCategoryType>("love");
   const [showModal, setShowModal] = useState(false);
   const [currentFortune, setCurrentFortune] = useState<Fortune | null>(null);
@@ -90,10 +103,10 @@ export default function CrystalBall() {
     <section id="fortune-teller" className="py-16 px-4 bg-purple-950/50 relative overflow-hidden">
       {/* Background stars effect */}
       <div className="absolute inset-0 bg-[radial-gradient(white,rgba(255,255,255,.2)_2px,transparent_7px),radial-gradient(white,rgba(255,255,255,.15)_1px,transparent_5px),radial-gradient(white,rgba(255,255,255,.1)_2px,transparent_10px)] bg-[size:550px_550px,350px_350px,250px_250px] bg-[position:0_0,40px_60px,130px_270px] opacity-20"></div>
-      
+
       <div className="container mx-auto relative z-10">
         <h2 className="font-['Cinzel'] text-3xl md:text-4xl text-center mb-12 text-amber-500">Crystal Ball Fortune Teller</h2>
-        
+
         <div className="grid md:grid-cols-2 gap-8 items-center">
           {/* Crystal Ball Visualization */}
           <div className="flex justify-center">
@@ -143,7 +156,7 @@ export default function CrystalBall() {
           <Card className="bg-purple-950/60 border-purple-800">
             <CardContent className="p-6">
               <h3 className="font-['Cinzel'] text-xl mb-4 text-center">Choose Your Path</h3>
-              
+
               <div className="mb-6">
                 <label className="block font-['Cinzel'] text-sm mb-2 text-amber-500">Select Category</label>
                 <div className="grid grid-cols-3 gap-2">
@@ -179,7 +192,7 @@ export default function CrystalBall() {
                   />
                 </div>
               </div>
-              
+
               <div className="mb-6">
                 <p className="text-sm italic text-white/80 mb-4">Focus on your question as you reveal your fortune...</p>
                 <Button 
