@@ -203,20 +203,51 @@ export function getMonthlyTheme() {
   return monthlyHoroscopeThemes[currentMonth as keyof typeof monthlyHoroscopeThemes];
 }
 
-// Generate seasonal fortune content
+// Content freshness tracking
+const contentHistory = new Map<string, number[]>();
+
+// Get seasonal fortune content with freshness tracking
 export function getSeasonalFortune(category: FortuneCategoryType) {
   const season = getCurrentSeason();
   const fortunes = seasonalFortuneContent[season][category];
-  const randomIndex = Math.floor(Math.random() * fortunes.length);
+
+  // Track content usage to ensure variety
+  const key = `${season}-${category}`;
+  const usedIndices = contentHistory.get(key) || [];
+
+  // If we've used all content, reset the tracking
+  if (usedIndices.length >= fortunes.length) {
+    contentHistory.set(key, []);
+  }
+
+  // Find unused content
+  const availableIndices = fortunes
+    .map((_, index) => index)
+    .filter(index => !usedIndices.includes(index));
+
+  const randomIndex = availableIndices.length > 0 
+    ? availableIndices[Math.floor(Math.random() * availableIndices.length)]
+    : Math.floor(Math.random() * fortunes.length);
+
+  // Track this usage
+  const updatedHistory = contentHistory.get(key) || [];
+  updatedHistory.push(randomIndex);
+  contentHistory.set(key, updatedHistory);
+
   const selectedFortune = fortunes[randomIndex];
-  
-  // Add daily theme influence
+
+  // Add daily theme influence with time-based variations
   const dayTheme = getDayTheme();
-  const enhancedContent = `${selectedFortune.content} Today's ${dayTheme.theme} energy supports ${dayTheme.focus.toLowerCase()}.`;
-  
+  const hour = new Date().getHours();
+  const timeVariant = hour < 12 ? "morning" : hour < 18 ? "afternoon" : "evening";
+
+  const enhancedContent = `${selectedFortune.content} This ${timeVariant}'s ${dayTheme.theme} energy supports ${dayTheme.focus.toLowerCase()}.`;
+
   return {
     ...selectedFortune,
-    content: enhancedContent
+    content: enhancedContent,
+    freshness: `New ${timeVariant} insight`,
+    timeGenerated: new Date().toLocaleTimeString()
   };
 }
 
@@ -224,10 +255,10 @@ export function getSeasonalFortune(category: FortuneCategoryType) {
 export function getContextualHoroscope(sign: ZodiacSignType) {
   const monthlyTheme = getMonthlyTheme();
   const dayTheme = getDayTheme();
-  
+
   // Base horoscope content with seasonal and daily influences
   const contextualContent = `${monthlyTheme.theme} energy influences your ${sign} nature today. ${dayTheme.focus} ${monthlyTheme.focus} becomes your focus.`;
-  
+
   return {
     thematicContent: contextualContent,
     monthlyFocus: monthlyTheme.focus,
@@ -239,7 +270,7 @@ export function getContextualHoroscope(sign: ZodiacSignType) {
 export function getWeeklyPreview() {
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   const themeKeys = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-  
+
   return days.map((day, index) => {
     const theme = weeklyFortuneThemes[themeKeys[index] as keyof typeof weeklyFortuneThemes];
     return {
