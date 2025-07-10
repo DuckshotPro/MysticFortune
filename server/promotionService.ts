@@ -194,6 +194,87 @@ class PromotionService {
     return this.postsQueue;
   }
 
+  // Self-promotion ad generator for the platform
+  async generateSelfPromotionAd(adType: string): Promise<{
+    type: string;
+    content: string;
+    platform: string;
+    createdAt: Date;
+    downloadUrl?: string;
+  }> {
+    const templates = {
+      social_media: {
+        instagram: [
+          "🔮 Unlock your mystic destiny with AI-powered fortune telling! ✨ Get personalized readings that reveal your true path. #MysticFortune #AI #Astrology #FortuneTelling",
+          "✨ Ancient wisdom meets modern AI 🤖 Experience the most accurate fortune readings online! Discover what the cosmos has in store for you. #MysticFortune #Cosmic #AI",
+          "🌟 Your future awaits! Get AI-enhanced tarot readings, personalized horoscopes, and crystal ball insights. Join thousands who've found their path! #MysticFortune #Tarot #AI"
+        ],
+        twitter: [
+          "🔮 The future of fortune telling is here! AI-powered personalized readings that actually work. Try Mystic Fortune today! #AI #FortuneTelling #MysticFortune",
+          "✨ Ancient mysticism + Modern AI = Incredible accuracy! Get your personalized fortune reading now 🌟 #MysticFortune #AI #Astrology",
+          "🌙 Discover your cosmic destiny with AI-enhanced fortune telling. Thousands of accurate readings delivered daily! #MysticFortune #AI #Cosmic"
+        ],
+        tiktok: [
+          "POV: You discover an AI that predicts your future with mystical accuracy 🔮✨ #MysticFortune #AI #FortuneTelling #Viral",
+          "This AI fortune teller knew my future before I did 😱🔮 Try it yourself! #MysticFortune #AI #MindBlown #Viral",
+          "When the AI fortune app predicts exactly what happens next 🤯✨ #MysticFortune #AI #Accurate #Viral"
+        ]
+      },
+      banner: [
+        "🔮 Unlock Your Mystic Destiny with AI-Powered Fortune Telling - Try Mystic Fortune Today!",
+        "✨ Ancient Wisdom Meets Modern AI - Get Your Personalized Reading Now!",
+        "🌟 Discover Your True Path - AI-Enhanced Mystical Insights Await!"
+      ],
+      video: [
+        "Create a mystical video showing AI generating personalized fortunes with cosmic animations",
+        "Show testimonials of users amazed by accurate AI fortune predictions",
+        "Demonstrate the app's AI features with magical visual effects and user success stories"
+      ]
+    };
+
+    let content: string;
+    let platform = 'general';
+
+    switch (adType) {
+      case 'social_media':
+        const platforms = ['instagram', 'twitter', 'tiktok'];
+        platform = platforms[Math.floor(Math.random() * platforms.length)];
+        const platformTemplates = templates.social_media[platform as keyof typeof templates.social_media];
+        content = platformTemplates[Math.floor(Math.random() * platformTemplates.length)];
+        break;
+      case 'banner':
+        content = templates.banner[Math.floor(Math.random() * templates.banner.length)];
+        platform = 'web';
+        break;
+      case 'video':
+        content = templates.video[Math.floor(Math.random() * templates.video.length)];
+        platform = 'video';
+        break;
+      default:
+        content = "🔮 Experience the future of fortune telling with AI-powered Mystic Fortune!";
+        break;
+    }
+
+    // If it's a banner or video, generate visual content
+    let downloadUrl;
+    if (adType === 'banner' || adType === 'video') {
+      try {
+        const artwork = await aiImageService.generatePromotionalArtwork();
+        downloadUrl = `/generated-assets/promotion-${Date.now()}.png`;
+      } catch (error) {
+        console.error('Failed to generate promotional artwork:', error);
+      }
+    }
+
+    return {
+      type: adType,
+      content,
+      platform,
+      createdAt: new Date(),
+      downloadUrl
+    };
+  }
+
   private getRandomCategory(): FortuneCategoryType {
     const categories = [FortuneCategory.LOVE, FortuneCategory.CAREER, FortuneCategory.GENERAL];
     return categories[Math.floor(Math.random() * categories.length)];

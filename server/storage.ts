@@ -25,6 +25,9 @@ export interface IStorage {
   saveFortune(savedFortune: InsertSavedFortune): Promise<SavedFortune>;
   deleteSavedFortune(id: number): Promise<boolean>;
   
+  // Admin methods
+  getAllUsers(): Promise<User[]>;
+  
   // Horoscope methods
   getHoroscopeBySign(sign: ZodiacSignType): Promise<Horoscope | undefined>;
   createHoroscope(horoscope: InsertHoroscope): Promise<Horoscope>;
@@ -111,6 +114,10 @@ export class DatabaseStorage implements IStorage {
       .values(insertHoroscope)
       .returning();
     return horoscope;
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return await db.select().from(users);
   }
 }
 
@@ -241,6 +248,10 @@ export class MemStorage implements IStorage {
     const horoscope: Horoscope = { ...insertHoroscope, id, date };
     this.horoscopesDb.set(insertHoroscope.sign, horoscope);
     return horoscope;
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return Array.from(this.users.values());
   }
   
   private initializeFortunes() {

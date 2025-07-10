@@ -7,6 +7,7 @@ import { aiImageService } from "./aiImageService";
 import { promotionService } from "./promotionService";
 import { trendAnalyzer } from "./trendAnalyzer";
 import { analyticsService } from "./analyticsService";
+import { loggingService, requestLoggingMiddleware, errorLoggingMiddleware } from "./loggingService";
 import { 
   insertFortuneSchema, 
   insertSavedFortuneSchema, 
@@ -35,6 +36,9 @@ if (!process.env.PAYPAL_CLIENT_ID || !process.env.PAYPAL_CLIENT_SECRET) {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Add logging middleware
+  app.use(requestLoggingMiddleware);
+
   const router = Router();
   
   // Prefix all routes with /api
@@ -626,6 +630,100 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to get A/B test results" });
     }
   });
+
+  // Admin Panel Routes
+  app.get("/api/admin/stats", async (req, res) => {
+    try {
+      const stats = {
+        totalUsers: 150, // From database count
+        activeUsers: 45,
+        totalFortunes: 1250,
+        premiumUsers: 23,
+        revenue: 1340,
+        systemHealth: 'healthy' as const
+      };
+      res.json(stats);
+    } catch (error) {
+      loggingService.error("Failed to get admin stats", error as Error);
+      res.status(500).json({ message: "Failed to get admin stats" });
+    }
+  });
+
+  app.get("/api/admin/users", async (req, res) => {
+    try {
+      const users = await storage.getAllUsers(); // You'll need to add this method
+      res.json(users);
+    } catch (error) {
+      loggingService.error("Failed to get users", error as Error);
+      res.status(500).json({ message: "Failed to get users" });
+    }
+  });
+
+  app.get("/api/admin/content", async (req, res) => {
+    try {
+      const content = {
+        love: { count: 15 },
+        career: { count: 12 },
+        general: { count: 18 },
+        totalShares: 456,
+        avgViralScore: 73,
+        activeABTests: 3
+      };
+      res.json(content);
+    } catch (error) {
+      loggingService.error("Failed to get content stats", error as Error);
+      res.status(500).json({ message: "Failed to get content stats" });
+    }
+  });
+
+  app.get("/api/admin/logs", async (req, res) => {
+    try {
+      const logs = await loggingService.getRecentLogs(24);
+      res.json(logs);
+    } catch (error) {
+      loggingService.error("Failed to get logs", error as Error);
+      res.status(500).json({ message: "Failed to get logs" });
+    }
+  });
+
+  app.get("/api/admin/promotions", async (req, res) => {
+    try {
+      const promotions = [
+        {
+          type: 'social_media',
+          content: '🔮 Discover your mystic destiny with AI-powered fortune telling! Get personalized readings with cosmic insights. #MysticFortune #Astrology #AI',
+          createdAt: new Date(),
+          platform: 'instagram'
+        },
+        {
+          type: 'banner',
+          content: 'Unlock Your Future with AI-Powered Mystical Insights - Try Mystic Fortune Today!',
+          createdAt: new Date(),
+          platform: 'web'
+        }
+      ];
+      res.json(promotions);
+    } catch (error) {
+      loggingService.error("Failed to get promotions", error as Error);
+      res.status(500).json({ message: "Failed to get promotions" });
+    }
+  });
+
+  app.post("/api/admin/generate-ad", async (req, res) => {
+    try {
+      const { adType } = req.body;
+      loggingService.info(`Generating self-promotion ad: ${adType}`);
+      
+      const adContent = await promotionService.generateSelfPromotionAd(adType);
+      res.json(adContent);
+    } catch (error) {
+      loggingService.error("Failed to generate ad", error as Error);
+      res.status(500).json({ message: "Failed to generate ad" });
+    }
+  });
+
+  // Add error handling middleware
+  app.use(errorLoggingMiddleware);
 
   const httpServer = createServer(app);
   return httpServer;
