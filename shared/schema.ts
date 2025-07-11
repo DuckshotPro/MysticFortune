@@ -380,6 +380,8 @@ export const userStats = pgTable("user_stats", {
   lastActiveDate: timestamp("last_active_date").defaultNow(),
   joinedDate: timestamp("joined_date").defaultNow().notNull(),
   premiumMember: boolean("premium_member").default(false),
+  consecutiveMembershipDays: integer("consecutive_membership_days").default(0),
+  membershipStartDate: timestamp("membership_start_date"),
   favoriteCategory: text("favorite_category"), // most used category
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull()
@@ -433,6 +435,8 @@ export const insertUserStatsSchema = createInsertSchema(userStats).pick({
   experiencePoints: true,
   lastActiveDate: true,
   premiumMember: true,
+  consecutiveMembershipDays: true,
+  membershipStartDate: true,
   favoriteCategory: true,
 });
 

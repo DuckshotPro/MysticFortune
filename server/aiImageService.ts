@@ -493,18 +493,28 @@ class AIImageService {
       // Generate new image
       const imageBuffer = await this.generateImage(prompt);
       
-      // Save image to public directory for serving
-      const assetsDir = path.join(process.cwd(), "client", "public", "generated-characters");
-      if (!fs.existsSync(assetsDir)) {
-        fs.mkdirSync(assetsDir, { recursive: true });
+      // Check if it's SVG content and encode properly
+      const isSVG = imageBuffer.toString().includes('<svg');
+      let imageUrl: string;
+      
+      if (isSVG) {
+        // For SVG, use proper data URL encoding
+        const base64Svg = imageBuffer.toString('base64');
+        imageUrl = `data:image/svg+xml;base64,${base64Svg}`;
+      } else {
+        // Save image to public directory for serving
+        const assetsDir = path.join(process.cwd(), "client", "public", "generated-characters");
+        if (!fs.existsSync(assetsDir)) {
+          fs.mkdirSync(assetsDir, { recursive: true });
+        }
+        
+        const timestamp = Date.now();
+        const filename = `${characterId}-${emotion}-${timestamp}.png`;
+        const filepath = path.join(assetsDir, filename);
+        
+        fs.writeFileSync(filepath, imageBuffer);
+        imageUrl = `/generated-characters/${filename}`;
       }
-      
-      const timestamp = Date.now();
-      const filename = `${characterId}-${emotion}-${timestamp}.png`;
-      const filepath = path.join(assetsDir, filename);
-      
-      fs.writeFileSync(filepath, imageBuffer);
-      const imageUrl = `/generated-characters/${filename}`;
       
       // Cache the new image for future use
       const savedCache = await this.saveToCache(

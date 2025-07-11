@@ -813,6 +813,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/track-membership/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      await achievementService.trackMembershipDay(userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Failed to track membership:", error);
+      res.status(500).json({ message: "Failed to track membership" });
+    }
+  });
+
   app.post("/api/milestone-celebration/:milestoneId", async (req, res) => {
     try {
       const milestoneId = parseInt(req.params.milestoneId);

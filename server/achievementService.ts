@@ -117,6 +117,41 @@ class AchievementService {
         points: 75
       },
 
+      // Membership achievements
+      {
+        name: "Loyal Member",
+        description: "Maintain consecutive membership for 1 month",
+        icon: "👑",
+        category: "membership",
+        type: "milestone",
+        requirement: 30,
+        requirementType: "consecutive_membership_days",
+        rarity: "rare",
+        points: 150
+      },
+      {
+        name: "Devoted Mystic",
+        description: "Maintain consecutive membership for 3 months",
+        icon: "💎",
+        category: "membership",
+        type: "milestone",
+        requirement: 90,
+        requirementType: "consecutive_membership_days",
+        rarity: "epic",
+        points: 400
+      },
+      {
+        name: "Eternal Seeker",
+        description: "Maintain consecutive membership for 6 months",
+        icon: "🌌",
+        category: "membership",
+        type: "milestone",
+        requirement: 180,
+        requirementType: "consecutive_membership_days",
+        rarity: "legendary",
+        points: 1000
+      },
+
       // Streak achievements
       {
         name: "Daily Devotee",
@@ -260,7 +295,9 @@ class AchievementService {
         level: 1,
         experiencePoints: 0,
         lastActiveDate: new Date(),
-        premiumMember: false
+        premiumMember: false,
+        consecutiveMembershipDays: 0,
+        membershipStartDate: null
       };
 
       [userStats] = await db.insert(userStats).values(newStats).returning();
@@ -364,6 +401,32 @@ class AchievementService {
   }
 
   /**
+   * Track consecutive membership days
+   */
+  async trackMembershipDay(userId: number): Promise<void> {
+    const stats = await this.getUserStats(userId);
+    
+    if (stats.premiumMember) {
+      const today = new Date();
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      
+      // Check if user was active yesterday to maintain streak
+      if (stats.lastActiveDate && stats.lastActiveDate >= yesterday) {
+        await this.updateUserStats(userId, {
+          consecutiveMembershipDays: stats.consecutiveMembershipDays + 1
+        });
+      } else {
+        // Reset streak if gap in membership activity
+        await this.updateUserStats(userId, {
+          consecutiveMembershipDays: 1,
+          membershipStartDate: today
+        });
+      }
+    }
+  }
+
+  /**
    * Check and unlock achievements
    */
   async checkAchievements(userId: number): Promise<UserAchievement[]> {
@@ -407,6 +470,9 @@ class AchievementService {
           break;
         case 'saved_fortunes':
           currentProgress = stats.savedFortunes;
+          break;
+        case 'consecutive_membership_days':
+          currentProgress = stats.consecutiveMembershipDays || 0;
           break;
         // Add more cases as needed
       }
