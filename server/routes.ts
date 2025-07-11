@@ -448,22 +448,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // AI character image generation
+  // AI character image generation with intelligent caching
   app.post('/api/ai/character-image', async (req, res) => {
     try {
-      const { prompt, characterId, emotion } = req.body;
+      const { prompt, characterId, emotion, userId, sessionId } = req.body;
 
       if (!prompt) {
         return res.status(400).json({ error: 'Prompt is required' });
       }
 
-      // Generate character image using AI service
-      const result = await aiImageService.generateCharacterImage(prompt, characterId, emotion);
+      // Generate character image using AI service with smart caching
+      const result = await aiImageService.generateCharacterImage(
+        prompt, 
+        characterId, 
+        emotion, 
+        userId, 
+        sessionId
+      );
 
       res.json({ 
         imageUrl: result.imageUrl,
         characterId: result.characterId,
         emotion: result.emotion,
+        cached: result.cached,
+        costSaved: result.costSaved,
         success: true 
       });
     } catch (error) {
@@ -772,6 +780,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       loggingService.error("Failed to get content stats", error as Error);
       res.status(500).json({ message: "Failed to get content stats" });
+    }
+  });
+
+  // Image cache optimization stats
+  router.get("/admin/cache-stats", verifyAdminToken, async (req, res) => {
+    try {
+      const [cacheStats, usageStats] = await Promise.all([
+        db.select({
+          totalImages: sql`COUNT(*)`,
+          totalUsage: sql`SUM(${aiImageCache.usageCount})`,
+          totalCostSaved: sql`SUM(${aiImageCache.generationCost} * (${aiImageCache.usageCount} - 1))`,
+          avgUsagePerImage: sql`AVG(${aiImageCache.usageCount})`,
+        }).from(aiImageCache),
+        
+        db.select({
+          uniqueViewers: sql`COUNT(DISTINCT COALESCE(${userImageViews.userId}, ${userImageViews.sessionId}))`,
+          totalViews: sql`COUNT(*)`,
+          recentViews: sql`COUNT(*) FILTER (WHERE ${userImageViews.viewedAt} > NOW() - INTERVAL '24 hours')`
+        }).from(userImageViews)
+      ]);
+
+      const stats = {
+        totalCachedImages: Number(cacheStats[0]?.totalImages) || 0,
+        totalImageReuses: Number(cacheStats[0]?.totalUsage) || 0,
+        estimatedCostSaved: Number(cacheStats[0]?.totalCostSaved) || 0,
+        averageReusePerImage: Number(cacheStats[0]?.avgUsagePerImage) || 0,
+        uniqueViewers: Number(usageStats[0]?.uniqueViewers) || 0,
+        totalViews: Number(usageStats[0]?.totalViews) || 0,
+        recentViews: Number(usageStats[0]?.recentViews) || 0,
+        cacheEfficiency: Number(cacheStats[0]?.totalUsage) > 0 ? 
+          ((Number(cacheStats[0]?.totalUsage) - Number(cacheStats[0]?.totalImages)) / Number(cacheStats[0]?.totalUsage) * 100).toFixed(1) : 0
+      };
+
+      res.json(stats);
+    } catch (error) {
+      loggingService.error("Failed to get cache stats", error as Error);
+      res.status(500).json({ message: "Failed to get cache stats" });
     }
   });
 

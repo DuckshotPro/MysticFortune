@@ -1,6 +1,10 @@
-import { FortuneCategoryType, UserProfile } from "@shared/schema";
+import { FortuneCategoryType, UserProfile, InsertAiImageCache, AiImageCache, InsertUserImageView } from "@shared/schema";
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
+import { db } from './db';
+import { aiImageCache, userImageViews } from '@shared/schema';
+import { eq, and, desc, lt, sql, not, inArray } from 'drizzle-orm';
 
 interface HuggingFaceImageResponse {
   blob: () => Promise<Blob>;
@@ -24,10 +28,168 @@ class AIImageService {
   private textBaseUrl = "https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium";
 
   constructor() {
-    if (!process.env.HUGGINGFACE_API_KEY) {
-      throw new Error("HUGGINGFACE_API_KEY environment variable is required");
+    this.apiKey = process.env.HUGGINGFACE_API_KEY || 'fallback';
+    this.ensureDirectories();
+  }
+
+  private ensureDirectories() {
+    const dirs = [
+      path.join(process.cwd(), "client", "public", "generated-characters"),
+      path.join(process.cwd(), "client", "public", "generated-assets")
+    ];
+    
+    dirs.forEach(dir => {
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+    });
+  }
+
+  // Generate MD5 hash for prompt caching
+  private hashPrompt(prompt: string, characterId?: string, emotion?: string): string {
+    const combined = `${prompt}-${characterId || ''}-${emotion || ''}`;
+    return crypto.createHash('md5').update(combined).digest('hex');
+  }
+
+  // Check cache for existing image and avoid showing same image to user
+  private async getCachedImage(promptHash: string, userId?: number, sessionId?: string): Promise<AiImageCache | null> {
+    try {
+      // First check if we have this exact prompt cached
+      const [existingImage] = await db
+        .select()
+        .from(aiImageCache)
+        .where(eq(aiImageCache.promptHash, promptHash))
+        .limit(1);
+
+      if (!existingImage) return null;
+
+      // If user is provided, check if they've seen this image recently
+      if (userId || sessionId) {
+        const recentView = await db
+          .select()
+          .from(userImageViews)
+          .where(
+            and(
+              eq(userImageViews.imageId, existingImage.id),
+              userId ? eq(userImageViews.userId, userId) : sql`true`,
+              sessionId ? eq(userImageViews.sessionId, sessionId) : sql`true`,
+              // Only check views from last 24 hours for variety
+              sql`${userImageViews.viewedAt} > NOW() - INTERVAL '24 hours'`
+            )
+          )
+          .limit(1);
+
+        // If user has seen this image recently, try to find an alternative
+        if (recentView.length > 0) {
+          const [alternativeImage] = await db
+            .select()
+            .from(aiImageCache)
+            .where(
+              and(
+                eq(aiImageCache.characterId, existingImage.characterId),
+                eq(aiImageCache.emotion, existingImage.emotion),
+                not(eq(aiImageCache.id, existingImage.id)),
+                // Make sure they haven't seen this alternative either
+                not(inArray(aiImageCache.id, 
+                  db.select({ id: userImageViews.imageId })
+                    .from(userImageViews)
+                    .where(
+                      and(
+                        userId ? eq(userImageViews.userId, userId) : sql`true`,
+                        sessionId ? eq(userImageViews.sessionId, sessionId) : sql`true`,
+                        sql`${userImageViews.viewedAt} > NOW() - INTERVAL '24 hours'`
+                      )
+                    )
+                ))
+              )
+            )
+            .orderBy(desc(aiImageCache.lastUsed))
+            .limit(1);
+
+          if (alternativeImage) {
+            return alternativeImage;
+          }
+        }
+      }
+
+      return existingImage;
+    } catch (error) {
+      console.error('Error checking image cache:', error);
+      return null;
     }
-    this.apiKey = process.env.HUGGINGFACE_API_KEY;
+  }
+
+  // Save image to cache
+  private async saveToCache(
+    promptHash: string, 
+    imageUrl: string, 
+    prompt: string,
+    characterId?: string,
+    emotion?: string,
+    category?: string,
+    fileSize?: number
+  ): Promise<AiImageCache> {
+    try {
+      const cacheEntry: InsertAiImageCache = {
+        promptHash,
+        imageUrl,
+        characterId,
+        emotion,
+        category,
+        promptText: prompt,
+        usageCount: 1,
+        fileSize,
+        generationCost: 0.02, // Approximate Hugging Face cost per image
+      };
+
+      const [saved] = await db
+        .insert(aiImageCache)
+        .values(cacheEntry)
+        .returning();
+
+      return saved;
+    } catch (error) {
+      console.error('Error saving to cache:', error);
+      throw error;
+    }
+  }
+
+  // Update cache usage
+  private async updateCacheUsage(imageId: number): Promise<void> {
+    try {
+      await db
+        .update(aiImageCache)
+        .set({ 
+          usageCount: sql`${aiImageCache.usageCount} + 1`,
+          lastUsed: new Date()
+        })
+        .where(eq(aiImageCache.id, imageId));
+    } catch (error) {
+      console.error('Error updating cache usage:', error);
+    }
+  }
+
+  // Track user image view
+  private async trackImageView(
+    imageId: number, 
+    userId?: number, 
+    sessionId?: string, 
+    context?: string
+  ): Promise<void> {
+    try {
+      if (!userId && !sessionId) return;
+
+      const viewRecord: InsertUserImageView = {
+        userId,
+        imageId,
+        sessionId,
+        context,
+      };
+
+      await db.insert(userImageViews).values(viewRecord);
+    } catch (error) {
+      console.error('Error tracking image view:', error);
+    }
   }
 
   private async generateImage(prompt: string): Promise<Buffer> {
@@ -286,13 +448,49 @@ class AIImageService {
     return basePrompts[category] || basePrompts.general;
   }
 
-  async generateCharacterImage(prompt: string, characterId: string, emotion: string): Promise<{
+  async generateCharacterImage(prompt: string, characterId: string, emotion: string, userId?: number, sessionId?: string): Promise<{
     imageBuffer: Buffer;
     imageUrl: string;
     characterId: string;
     emotion: string;
+    cached: boolean;
+    costSaved: number;
   }> {
     try {
+      const promptHash = this.hashPrompt(prompt, characterId, emotion);
+      
+      // Check cache first for cost optimization
+      const cachedImage = await this.getCachedImage(promptHash, userId, sessionId);
+      
+      if (cachedImage) {
+        // Update usage tracking
+        await this.updateCacheUsage(cachedImage.id);
+        await this.trackImageView(cachedImage.id, userId, sessionId, 'character_generation');
+        
+        const fullPath = path.join(process.cwd(), "client", "public", cachedImage.imageUrl);
+        let imageBuffer: Buffer;
+        
+        if (fs.existsSync(fullPath)) {
+          imageBuffer = fs.readFileSync(fullPath);
+        } else {
+          // File missing, regenerate but keep cache entry
+          imageBuffer = await this.generateImage(prompt);
+          const filename = cachedImage.imageUrl.split('/').pop() || `${characterId}-${emotion}-${Date.now()}.png`;
+          const filepath = path.join(process.cwd(), "client", "public", "generated-characters", filename);
+          fs.writeFileSync(filepath, imageBuffer);
+        }
+        
+        return {
+          imageBuffer,
+          imageUrl: cachedImage.imageUrl,
+          characterId,
+          emotion,
+          cached: true,
+          costSaved: 0.02, // $0.02 saved per reused image
+        };
+      }
+      
+      // Generate new image
       const imageBuffer = await this.generateImage(prompt);
       
       // Save image to public directory for serving
@@ -306,16 +504,48 @@ class AIImageService {
       const filepath = path.join(assetsDir, filename);
       
       fs.writeFileSync(filepath, imageBuffer);
+      const imageUrl = `/generated-characters/${filename}`;
+      
+      // Cache the new image for future use
+      const savedCache = await this.saveToCache(
+        promptHash,
+        imageUrl,
+        prompt,
+        characterId,
+        emotion,
+        'character',
+        imageBuffer.length
+      );
+      
+      // Track the initial view
+      await this.trackImageView(savedCache.id, userId, sessionId, 'character_generation');
       
       return {
         imageBuffer,
-        imageUrl: `/generated-characters/${filename}`,
+        imageUrl,
         characterId,
-        emotion
+        emotion,
+        cached: false,
+        costSaved: 0,
       };
     } catch (error) {
       console.error("Error generating character image:", error);
-      throw new Error("Failed to generate character image");
+      
+      // Generate fallback SVG as backup
+      const fallbackSVG = this.generateFallbackSVG(prompt);
+      const filename = `fallback-${characterId}-${emotion}-${Date.now()}.svg`;
+      const filepath = path.join(process.cwd(), "client", "public", "generated-characters", filename);
+      
+      fs.writeFileSync(filepath, fallbackSVG);
+      
+      return {
+        imageBuffer: fallbackSVG,
+        imageUrl: `/generated-characters/${filename}`,
+        characterId,
+        emotion,
+        cached: false,
+        costSaved: 0,
+      };
     }
   }
 

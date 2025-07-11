@@ -12,6 +12,7 @@ import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
+import CacheStatsPanel from './CacheStatsPanel';
 import { 
   Users, 
   BarChart3, 
@@ -26,7 +27,8 @@ import {
   Zap,
   Eye,
   Share2,
-  Target
+  Target,
+  Image
 } from 'lucide-react';
 
 interface AdminStats {
@@ -435,10 +437,14 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
         <AdminOverview />
 
         <Tabs defaultValue="analytics" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6 bg-purple-900/50">
+          <TabsList className="grid w-full grid-cols-7 bg-purple-900/50">
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="content">Content</TabsTrigger>
+            <TabsTrigger value="cache">
+              <Image className="h-4 w-4 mr-1" />
+              Cache
+            </TabsTrigger>
             <TabsTrigger value="promotion">Promotion</TabsTrigger>
             <TabsTrigger value="logs">Logs</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
@@ -462,6 +468,10 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
           <TabsContent value="content">
             <ContentManagement />
+          </TabsContent>
+
+          <TabsContent value="cache">
+            <CacheStatsPanel />
           </TabsContent>
 
           <TabsContent value="promotion">

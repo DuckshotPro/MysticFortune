@@ -277,3 +277,54 @@ export const ZodiacSigns = {
 } as const;
 
 export type ZodiacSignType = typeof ZodiacSigns[keyof typeof ZodiacSigns];
+
+// AI Generated Images Cache Table - Smart cost optimization
+export const aiImageCache = pgTable("ai_image_cache", {
+  id: serial("id").primaryKey(),
+  promptHash: text("prompt_hash").notNull().unique(), // MD5 hash of the prompt
+  imageUrl: text("image_url").notNull(),
+  characterId: text("character_id"),
+  emotion: text("emotion"),
+  category: text("category"),
+  promptText: text("prompt_text").notNull(),
+  usageCount: integer("usage_count").default(1),
+  lastUsed: timestamp("last_used").defaultNow().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  fileSize: integer("file_size"), // in bytes
+  generationCost: real("generation_cost").default(0.02), // track cost savings
+});
+
+// User Image Views - Track what images users have seen to avoid repetition
+export const userImageViews = pgTable("user_image_views", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
+  imageId: integer("image_id").references(() => aiImageCache.id),
+  sessionId: text("session_id"),
+  viewedAt: timestamp("viewed_at").defaultNow().notNull(),
+  context: text("context"), // 'fortune_reading', 'character_selection', etc.
+});
+
+// Schema validation for image caching
+export const insertAiImageCacheSchema = createInsertSchema(aiImageCache).pick({
+  promptHash: true,
+  imageUrl: true,
+  characterId: true,
+  emotion: true,
+  category: true,
+  promptText: true,
+  usageCount: true,
+  fileSize: true,
+  generationCost: true,
+});
+
+export const insertUserImageViewSchema = createInsertSchema(userImageViews).pick({
+  userId: true,
+  imageId: true,
+  sessionId: true,
+  context: true,
+});
+
+export type InsertAiImageCache = z.infer<typeof insertAiImageCacheSchema>;
+export type AiImageCache = typeof aiImageCache.$inferSelect;
+export type InsertUserImageView = z.infer<typeof insertUserImageViewSchema>;
+export type UserImageView = typeof userImageViews.$inferSelect;

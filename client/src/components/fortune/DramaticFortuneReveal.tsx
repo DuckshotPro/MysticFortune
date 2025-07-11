@@ -71,15 +71,31 @@ export default function DramaticFortuneReveal({ characterId, category, onFortune
     setIsGeneratingImage(true);
     try {
       const prompt = generateCharacterPrompt(char, emotion);
+      
+      // Generate session ID if not available for cost optimization
+      const sessionId = localStorage.getItem('mystic-session-id') || `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      localStorage.setItem('mystic-session-id', sessionId);
+      
       const response = await fetch('/api/ai/character-image', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt, characterId: char.id, emotion })
+        body: JSON.stringify({ 
+          prompt, 
+          characterId: char.id, 
+          emotion,
+          sessionId,
+          userId: null // Will be set when user authentication is added
+        })
       });
       
       if (response.ok) {
         const data = await response.json();
         setCharacterImage(data.imageUrl);
+        
+        // Show cost optimization info if image was cached
+        if (data.cached && data.costSaved > 0) {
+          console.log(`💰 Cost optimization: Reused cached image (saved $${data.costSaved.toFixed(3)})`);
+        }
       }
     } catch (error) {
       console.error('Error generating character image:', error);
