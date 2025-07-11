@@ -324,7 +324,129 @@ export const insertUserImageViewSchema = createInsertSchema(userImageViews).pick
   context: true,
 });
 
+// Achievement and Milestone System
+export const achievements = pgTable("achievements", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  description: text("description").notNull(),
+  icon: text("icon").notNull(), // lucide icon name or emoji
+  category: text("category").notNull(), // 'fortune', 'social', 'engagement', 'streak', 'special'
+  type: text("type").notNull(), // 'milestone', 'badge', 'streak', 'special_event'
+  requirement: integer("requirement").notNull(), // target number
+  requirementType: text("requirement_type").notNull(), // 'fortunes_generated', 'horoscopes_viewed', 'consecutive_days', etc.
+  rarity: text("rarity").notNull(), // 'common', 'rare', 'epic', 'legendary'
+  points: integer("points").default(10), // achievement points
+  unlocksFeature: text("unlocks_feature"), // optional feature unlock
+  isHidden: boolean("is_hidden").default(false), // secret achievements
+  createdAt: timestamp("created_at").defaultNow().notNull()
+});
+
+export const userAchievements = pgTable("user_achievements", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  achievementId: integer("achievement_id").references(() => achievements.id).notNull(),
+  progress: integer("progress").default(0), // current progress towards achievement
+  isCompleted: boolean("is_completed").default(false),
+  completedAt: timestamp("completed_at"),
+  notificationSent: boolean("notification_sent").default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull()
+});
+
+export const userMilestones = pgTable("user_milestones", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  milestoneType: text("milestone_type").notNull(), // 'first_fortune', 'weekly_streak', 'social_share', etc.
+  milestoneValue: integer("milestone_value").notNull(), // numerical value (days, count, etc.)
+  description: text("description").notNull(),
+  rewardType: text("reward_type"), // 'points', 'badge', 'feature_unlock', 'special_reading'
+  rewardValue: text("reward_value"), // JSON string of reward details
+  achievedAt: timestamp("achieved_at").defaultNow().notNull(),
+  celebrationShown: boolean("celebration_shown").default(false)
+});
+
+export const userStats = pgTable("user_stats", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull().unique(),
+  totalFortunes: integer("total_fortunes").default(0),
+  totalHoroscopes: integer("total_horoscopes").default(0),
+  totalTarotReadings: integer("total_tarot_readings").default(0),
+  socialShares: integer("social_shares").default(0),
+  savedFortunes: integer("saved_fortunes").default(0),
+  currentStreak: integer("current_streak").default(0), // consecutive days
+  longestStreak: integer("longest_streak").default(0),
+  totalAchievementPoints: integer("total_achievement_points").default(0),
+  level: integer("level").default(1), // user level based on points
+  experiencePoints: integer("experience_points").default(0),
+  lastActiveDate: timestamp("last_active_date").defaultNow(),
+  joinedDate: timestamp("joined_date").defaultNow().notNull(),
+  premiumMember: boolean("premium_member").default(false),
+  favoriteCategory: text("favorite_category"), // most used category
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull()
+});
+
+// Achievement system schemas
+export const insertAchievementSchema = createInsertSchema(achievements).pick({
+  name: true,
+  description: true,
+  icon: true,
+  category: true,
+  type: true,
+  requirement: true,
+  requirementType: true,
+  rarity: true,
+  points: true,
+  unlocksFeature: true,
+  isHidden: true,
+});
+
+export const insertUserAchievementSchema = createInsertSchema(userAchievements).pick({
+  userId: true,
+  achievementId: true,
+  progress: true,
+  isCompleted: true,
+  completedAt: true,
+  notificationSent: true,
+});
+
+export const insertUserMilestoneSchema = createInsertSchema(userMilestones).pick({
+  userId: true,
+  milestoneType: true,
+  milestoneValue: true,
+  description: true,
+  rewardType: true,
+  rewardValue: true,
+  celebrationShown: true,
+});
+
+export const insertUserStatsSchema = createInsertSchema(userStats).pick({
+  userId: true,
+  totalFortunes: true,
+  totalHoroscopes: true,
+  totalTarotReadings: true,
+  socialShares: true,
+  savedFortunes: true,
+  currentStreak: true,
+  longestStreak: true,
+  totalAchievementPoints: true,
+  level: true,
+  experiencePoints: true,
+  lastActiveDate: true,
+  premiumMember: true,
+  favoriteCategory: true,
+});
+
 export type InsertAiImageCache = z.infer<typeof insertAiImageCacheSchema>;
 export type AiImageCache = typeof aiImageCache.$inferSelect;
 export type InsertUserImageView = z.infer<typeof insertUserImageViewSchema>;
 export type UserImageView = typeof userImageViews.$inferSelect;
+
+// Achievement system types
+export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
+export type Achievement = typeof achievements.$inferSelect;
+export type InsertUserAchievement = z.infer<typeof insertUserAchievementSchema>;
+export type UserAchievement = typeof userAchievements.$inferSelect;
+export type InsertUserMilestone = z.infer<typeof insertUserMilestoneSchema>;
+export type UserMilestone = typeof userMilestones.$inferSelect;
+export type InsertUserStats = z.infer<typeof insertUserStatsSchema>;
+export type UserStats = typeof userStats.$inferSelect;

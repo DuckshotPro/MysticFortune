@@ -8,6 +8,7 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Premium from "@/pages/premium";
 import AdminPage from "./pages/admin";
+import AchievementsPage from "./pages/AchievementsPage";
 import FontLoader from "@/lib/fontLoader";
 
 function Router() {
@@ -16,6 +17,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/premium" component={Premium} />
       <Route path="/admin" component={AdminPage} />
+      <Route path="/achievements" component={AchievementsPage} />
       <Route component={NotFound} />
     </Switch>
   );

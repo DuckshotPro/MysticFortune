@@ -100,11 +100,21 @@ export function CrystalBall() {
     playSoundEffect('mystical-reveal');
     setShowModal(true);
     setShowDramaticReveal(false);
+    
+    // Track fortune generation for achievements
+    const userId = 1; // In a real app, this would be the actual user ID
+    fetch(`/api/track-fortune/${userId}`, { method: 'POST' })
+      .catch(error => console.error('Failed to track fortune:', error));
   };
 
   const handleSaveFortune = async () => {
     if (currentFortune) {
       await saveFortuneMutation.mutateAsync(currentFortune);
+      
+      // Track fortune saving for achievements
+      const userId = 1; // In a real app, this would be the actual user ID
+      fetch(`/api/track-fortune-saved/${userId}`, { method: 'POST' })
+        .catch(error => console.error('Failed to track fortune saved:', error));
     }
   };
 

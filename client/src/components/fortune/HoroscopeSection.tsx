@@ -91,6 +91,11 @@ export default function HoroscopeSection() {
     setSelectedSign(sign);
     playSoundEffect('cosmic-transition');
     playFortuneMusic('horoscope');
+    
+    // Track horoscope viewing for achievements
+    const userId = 1; // In a real app, this would be the actual user ID
+    fetch(`/api/track-horoscope/${userId}`, { method: 'POST' })
+      .catch(error => console.error('Failed to track horoscope:', error));
   };
   
   // Group zodiac signs into rows for better mobile layout

@@ -8,6 +8,7 @@ import { promotionService } from "./promotionService";
 import { trendAnalyzer } from "./trendAnalyzer";
 import { analyticsService } from "./analyticsService";
 import { loggingService, requestLoggingMiddleware, errorLoggingMiddleware } from "./loggingService";
+import { achievementService } from "./achievementService";
 import { 
   insertFortuneSchema, 
   insertSavedFortuneSchema, 
@@ -708,6 +709,118 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Failed to get A/B test results:", error);
       res.status(500).json({ message: "Failed to get A/B test results" });
+    }
+  });
+
+  // Achievement System Routes
+  app.get("/api/user-stats/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const stats = await achievementService.getUserStats(userId);
+      res.json(stats);
+    } catch (error) {
+      console.error("Failed to get user stats:", error);
+      res.status(500).json({ message: "Failed to get user stats" });
+    }
+  });
+
+  app.get("/api/user-achievements/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const achievements = await achievementService.getUserAchievements(userId);
+      res.json(achievements);
+    } catch (error) {
+      console.error("Failed to get user achievements:", error);
+      res.status(500).json({ message: "Failed to get user achievements" });
+    }
+  });
+
+  app.get("/api/user-level/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const level = await achievementService.getUserLevel(userId);
+      res.json(level);
+    } catch (error) {
+      console.error("Failed to get user level:", error);
+      res.status(500).json({ message: "Failed to get user level" });
+    }
+  });
+
+  app.get("/api/user-milestones/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const limit = parseInt(req.query.limit as string) || 10;
+      const milestones = await achievementService.getUserMilestones(userId, limit);
+      res.json(milestones);
+    } catch (error) {
+      console.error("Failed to get user milestones:", error);
+      res.status(500).json({ message: "Failed to get user milestones" });
+    }
+  });
+
+  app.post("/api/track-activity/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      await achievementService.trackUserActivity(userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Failed to track user activity:", error);
+      res.status(500).json({ message: "Failed to track user activity" });
+    }
+  });
+
+  app.post("/api/track-fortune/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      await achievementService.trackFortuneGenerated(userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Failed to track fortune:", error);
+      res.status(500).json({ message: "Failed to track fortune" });
+    }
+  });
+
+  app.post("/api/track-horoscope/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      await achievementService.trackHoroscopeViewed(userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Failed to track horoscope:", error);
+      res.status(500).json({ message: "Failed to track horoscope" });
+    }
+  });
+
+  app.post("/api/track-social-share/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      await achievementService.trackSocialShare(userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Failed to track social share:", error);
+      res.status(500).json({ message: "Failed to track social share" });
+    }
+  });
+
+  app.post("/api/track-fortune-saved/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      await achievementService.trackFortuneSaved(userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Failed to track fortune saved:", error);
+      res.status(500).json({ message: "Failed to track fortune saved" });
+    }
+  });
+
+  app.post("/api/milestone-celebration/:milestoneId", async (req, res) => {
+    try {
+      const milestoneId = parseInt(req.params.milestoneId);
+      await achievementService.markCelebrationShown(milestoneId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Failed to mark celebration:", error);
+      res.status(500).json({ message: "Failed to mark celebration" });
     }
   });
 
