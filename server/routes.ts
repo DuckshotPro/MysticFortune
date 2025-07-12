@@ -990,6 +990,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Health check endpoint for troubleshooting
+  app.get("/api/health", (req, res) => {
+    res.json({
+      status: "ok",
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      version: "1.0.0",
+      environment: process.env.NODE_ENV || "development"
+    });
+  });
+
+  // Simple test endpoint
+  app.get("/api/test", (req, res) => {
+    res.json({ message: "API is working correctly", timestamp: new Date() });
+  });
+
   // Add error handling middleware
   app.use(errorLoggingMiddleware);
 

@@ -43,8 +43,11 @@ class SoundManager {
       
       // Use Web Audio API oscillator as fallback for missing files
       audio.addEventListener('error', () => {
-        console.log(`Sound file not found: ${url}, using synthesized sound`);
-        this.createSynthesizedSound(effect as SoundEffect);
+        // Only log once per effect, reduce console spam
+        if (!this.soundEffects.has(`${effect}_fallback` as SoundEffect)) {
+          console.log(`Sound file not found: ${url}, using synthesized sound`);
+          this.createSynthesizedSound(effect as SoundEffect);
+        }
       });
       
       audio.src = url;
