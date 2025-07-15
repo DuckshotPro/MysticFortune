@@ -13,6 +13,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import CacheStatsPanel from './CacheStatsPanel';
+import DatabaseAdmin from './DatabaseAdmin';
+import PerformanceMonitor from './PerformanceMonitor';
 import { 
   Users, 
   BarChart3, 
@@ -54,6 +56,21 @@ function AdminOverview() {
       return response.json() as AdminStats;
     },
     refetchInterval: 30000 // Refresh every 30 seconds
+  });
+
+  const { data: systemHealth } = useQuery({
+    queryKey: ['admin', 'system-health'],
+    queryFn: async () => {
+      const token = localStorage.getItem('admin_token');
+      const response = await fetch('/api/admin/system-health', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (!response.ok) throw new Error('Failed to fetch system health');
+      return response.json();
+    },
+    refetchInterval: 10000 // Refresh every 10 seconds
   });
 
   if (isLoading) {
@@ -437,13 +454,21 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
         <AdminOverview />
 
         <Tabs defaultValue="analytics" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7 bg-purple-900/50">
+          <TabsList className="grid w-full grid-cols-9 bg-purple-900/50">
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="content">Content</TabsTrigger>
             <TabsTrigger value="cache">
               <Image className="h-4 w-4 mr-1" />
               Cache
+            </TabsTrigger>
+            <TabsTrigger value="database">
+              <Database className="h-4 w-4 mr-1" />
+              Database
+            </TabsTrigger>
+            <TabsTrigger value="performance">
+              <Activity className="h-4 w-4 mr-1" />
+              Performance
             </TabsTrigger>
             <TabsTrigger value="promotion">Promotion</TabsTrigger>
             <TabsTrigger value="logs">Logs</TabsTrigger>
@@ -472,6 +497,14 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
           <TabsContent value="cache">
             <CacheStatsPanel />
+          </TabsContent>
+
+          <TabsContent value="database">
+            <DatabaseAdmin />
+          </TabsContent>
+
+          <TabsContent value="performance">
+            <PerformanceMonitor />
           </TabsContent>
 
           <TabsContent value="promotion">
