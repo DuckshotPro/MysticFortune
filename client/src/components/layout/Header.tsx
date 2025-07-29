@@ -1,14 +1,30 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMoon, faBars, faCrown, faTrophy } from "@fortawesome/free-solid-svg-icons";
+import { faMoon, faBars, faCrown, faTrophy, faUser, faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  
+  useEffect(() => {
+    // Check if user is logged in
+    const userData = localStorage.getItem('user_data');
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
+  }, []);
   
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('user_token');
+    localStorage.removeItem('user_data');
+    setUser(null);
+    window.location.reload();
   };
   
   return (
@@ -45,6 +61,26 @@ export default function Header() {
                 <FontAwesomeIcon icon={faCrown} className="mr-1 text-xs" /> Premium
               </Link>
             </li>
+            {user ? (
+              <li className="flex items-center space-x-2">
+                <span className="font-['Cinzel'] text-sm text-amber-400">
+                  Welcome, {user.firstName || user.username}
+                </span>
+                <button 
+                  onClick={handleLogout}
+                  className="font-['Cinzel'] text-sm hover:text-amber-500 transition-colors"
+                  title="Logout"
+                >
+                  <FontAwesomeIcon icon={faSignOutAlt} />
+                </button>
+              </li>
+            ) : (
+              <li>
+                <Link href="/login" className="flex items-center font-['Cinzel'] text-sm border border-amber-500 text-amber-500 px-3 py-1 rounded-full hover:bg-amber-500 hover:text-purple-950 transition-colors">
+                  <FontAwesomeIcon icon={faUser} className="mr-1 text-xs" /> Login
+                </Link>
+              </li>
+            )}
           </ul>
         </nav>
         

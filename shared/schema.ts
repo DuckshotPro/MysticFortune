@@ -5,7 +5,21 @@ import { z } from "zod";
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
-  password: text("password").notNull(),
+  email: text("email").unique(),
+  password: text("password"),
+  authProvider: text("auth_provider").default("local"), // local, google, facebook, github
+  profileImageUrl: text("profile_image_url"),
+  firstName: text("first_name"),
+  lastName: text("last_name"),
+  birthDate: timestamp("birth_date"),
+  zodiacSign: text("zodiac_sign"),
+  isPremium: boolean("is_premium").default(false),
+  premiumExpiresAt: timestamp("premium_expires_at"),
+  totalReadings: integer("total_readings").default(0),
+  favoriteCategories: text("favorite_categories").array().default([]),
+  lastLoginAt: timestamp("last_login_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 export const fortunes = pgTable("fortunes", {
@@ -121,6 +135,30 @@ export const viralMetrics = pgTable("viral_metrics", {
   hashtags: text("hashtags").array(),
   peakEngagementTime: timestamp("peak_engagement_time")
 });
+
+// Dynamic Promotion Content - Connect admin generator to live ads
+export const promotionalContent = pgTable("promotional_content", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  category: text("category").notNull(), // fortune_ads, premium_promo, social_media
+  platform: text("platform"), // facebook, instagram, twitter, website
+  adType: text("ad_type").notNull(), // banner, inline, footer, social_post
+  isActive: boolean("is_active").default(true),
+  priority: integer("priority").default(1), // higher = more likely to show
+  targetAudience: text("target_audience"), // new_users, premium_prospects, frequent_users
+  impressions: integer("impressions").default(0),
+  clicks: integer("clicks").default(0),
+  conversions: integer("conversions").default(0),
+  startDate: timestamp("start_date").defaultNow(),
+  endDate: timestamp("end_date"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull()
+});
+
+// Export types for promotional content
+export type PromotionalContent = typeof promotionalContent.$inferSelect;
+export type InsertPromotionalContent = typeof promotionalContent.$inferInsert;
 
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,

@@ -7,6 +7,7 @@ import { ThemeProvider as NextThemesProvider } from "next-themes";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Premium from "@/pages/premium";
+import Login from "@/pages/login";
 import AdminPage from "./pages/admin";
 import AchievementsPage from "./pages/AchievementsPage";
 import FontLoader from "@/lib/fontLoader";
@@ -15,6 +16,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/login" component={Login} />
       <Route path="/premium" component={Premium} />
       <Route path="/admin" component={AdminPage} />
       <Route path="/achievements" component={AchievementsPage} />
