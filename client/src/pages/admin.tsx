@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AdminDashboard from '@/components/admin/AdminDashboard';
 import AdminLogin from '@/components/admin/AdminLogin';
+import EnhancedAdminPanel from '@/components/admin/EnhancedAdminPanel';
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -75,5 +76,5 @@ export default function AdminPage() {
     return <AdminLogin onLogin={handleLogin} />;
   }
 
-  return <AdminDashboard onLogout={handleLogout} />;
+  return <EnhancedAdminPanel />;
 }
