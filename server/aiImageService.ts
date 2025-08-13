@@ -6,29 +6,12 @@ import { db } from './db';
 import { aiImageCache, userImageViews } from '@shared/schema';
 import { eq, and, desc, lt, sql, not, inArray } from 'drizzle-orm';
 
-interface HuggingFaceImageResponse {
-  blob: () => Promise<Blob>;
-  arrayBuffer: () => Promise<ArrayBuffer>;
-}
+// Custom AI image generation service - no external API dependencies
 
-interface HuggingFaceTextResponse {
-  generated_text: string;
-}
-
-interface UserProfile {
-  birthDate?: Date;
-  preferences?: string[];
-  readingHistory?: string[];
-  favoriteCategories?: FortuneCategoryType[];
-}
+// UserProfile interface imported from schema
 
 class AIImageService {
-  private apiKey: string;
-  private imageBaseUrl = "https://api-inference.huggingface.co/models/CompVis/stable-diffusion-v1-4";
-  private textBaseUrl = "https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium";
-
   constructor() {
-    this.apiKey = process.env.HUGGINGFACE_API_KEY || 'fallback';
     this.ensureDirectories();
   }
 
@@ -86,8 +69,8 @@ class AIImageService {
             .from(aiImageCache)
             .where(
               and(
-                eq(aiImageCache.characterId, existingImage.characterId),
-                eq(aiImageCache.emotion, existingImage.emotion),
+                existingImage.characterId ? eq(aiImageCache.characterId, existingImage.characterId) : sql`${aiImageCache.characterId} IS NULL`,
+                existingImage.emotion ? eq(aiImageCache.emotion, existingImage.emotion) : sql`${aiImageCache.emotion} IS NULL`,
                 not(eq(aiImageCache.id, existingImage.id)),
                 // Make sure they haven't seen this alternative either
                 not(inArray(aiImageCache.id, 
@@ -193,77 +176,293 @@ class AIImageService {
   }
 
   private async generateImage(prompt: string): Promise<Buffer> {
-    try {
-      const response = await fetch(this.imageBaseUrl, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${this.apiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          inputs: prompt,
-          options: {
-            wait_for_model: true
-          }
-        }),
-      });
-
-      if (response.ok) {
-        const arrayBuffer = await response.arrayBuffer();
-        return Buffer.from(arrayBuffer);
-      }
-    } catch (error) {
-      console.log("Hugging Face API unavailable, using fallback SVG generation");
-    }
-
-    // Fallback: Generate beautiful SVG artwork
-    return this.generateFallbackSVG(prompt);
+    // Direct AI image generation using provocative visual style
+    return this.generateSeductiveCharacterSVG(prompt);
   }
 
-  private generateFallbackSVG(prompt: string): Buffer {
-    const colors = {
-      love: ["#ff6b9d", "#c44569", "#f8b500", "#feca57"],
-      career: ["#3742fa", "#2f3542", "#ff4757", "#ffa726"],
-      general: ["#5f27cd", "#00d2d3", "#ff9ff3", "#54a0ff"]
-    };
-
+  private generateSeductiveCharacterSVG(prompt: string): Buffer {
+    // Analyze prompt to determine character type and style
+    const isMale = prompt.toLowerCase().includes('man') || prompt.toLowerCase().includes('male');
     const category = prompt.includes("love") ? "love" : 
                     prompt.includes("career") ? "career" : "general";
-    const colorPalette = colors[category];
+    
+    // Enhanced color scheme matching your vision: warm terracotta, cool teal, deep purple, gold
+    const colors = {
+      deepPurple: "#2E0854",
+      purpleGradient: ["#6A1B9A", "#4A148C", "#2E0854"],
+      terracotta: ["#CD5C5C", "#D2691E", "#B8860B"],
+      teal: ["#008B8B", "#20B2AA", "#48CCCC"],
+      gold: ["#FFD700", "#FFA500", "#FF8C00"],
+      skin: isMale ? ["#D2B48C", "#DEB887", "#F5DEB3"] : ["#FDBCB4", "#F4A460", "#DDA0DD"]
+    };
+
+    // Generate random variation for uniqueness
+    const variations = [
+      { pose: "front", lighting: "dramatic", expression: "seductive" },
+      { pose: "side", lighting: "soft", expression: "mysterious" },
+      { pose: "three-quarter", lighting: "intense", expression: "alluring" },
+      { pose: "looking-up", lighting: "golden", expression: "enchanting" }
+    ];
+    
+    const variation = variations[Math.floor(Math.random() * variations.length)];
+    const goldColor = colors.gold[Math.floor(Math.random() * colors.gold.length)];
+    const skinColor = colors.skin[Math.floor(Math.random() * colors.skin.length)];
+    const terracottaColor = colors.terracotta[Math.floor(Math.random() * colors.terracotta.length)];
+    const tealColor = colors.teal[Math.floor(Math.random() * colors.teal.length)];
 
     const svg = `
       <svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <radialGradient id="bg" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" style="stop-color:${colorPalette[0]};stop-opacity:0.8"/>
-            <stop offset="100%" style="stop-color:${colorPalette[1]};stop-opacity:0.3"/>
+          <!-- Background gradient -->
+          <radialGradient id="bgGrad" cx="50%" cy="30%" r="80%">
+            <stop offset="0%" style="stop-color:#6A1B9A;stop-opacity:1"/>
+            <stop offset="50%" style="stop-color:#4A148C;stop-opacity:1"/>
+            <stop offset="100%" style="stop-color:#2E0854;stop-opacity:1"/>
           </radialGradient>
-          <linearGradient id="figure" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style="stop-color:${colorPalette[2]};stop-opacity:0.9"/>
-            <stop offset="100%" style="stop-color:${colorPalette[3]};stop-opacity:0.7"/>
+          
+          <!-- Dramatic lighting gradients -->
+          <linearGradient id="lightGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:${terracottaColor};stop-opacity:0.8"/>
+            <stop offset="50%" style="stop-color:${goldColor};stop-opacity:0.6"/>
+            <stop offset="100%" style="stop-color:${tealColor};stop-opacity:0.4"/>
           </linearGradient>
+          
+          <!-- Skin gradient -->
+          <radialGradient id="skinGrad" cx="40%" cy="30%" r="60%">
+            <stop offset="0%" style="stop-color:${skinColor};stop-opacity:1"/>
+            <stop offset="70%" style="stop-color:${terracottaColor};stop-opacity:0.3"/>
+            <stop offset="100%" style="stop-color:${colors.deepPurple};stop-opacity:0.2"/>
+          </radialGradient>
+          
+          <!-- Hair gradient -->
+          <linearGradient id="hairGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#2C1810;stop-opacity:1"/>
+            <stop offset="50%" style="stop-color:${tealColor};stop-opacity:0.3"/>
+            <stop offset="100%" style="stop-color:#1A0F08;stop-opacity:1"/>
+          </linearGradient>
+          
+          <!-- Eye gradient -->
+          <radialGradient id="eyeGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" style="stop-color:${tealColor};stop-opacity:1"/>
+            <stop offset="80%" style="stop-color:${goldColor};stop-opacity:0.8"/>
+            <stop offset="100%" style="stop-color:#000;stop-opacity:1"/>
+          </radialGradient>
         </defs>
-        <rect width="512" height="512" fill="url(#bg)"/>
-        <circle cx="256" cy="180" r="80" fill="url(#figure)" opacity="0.8"/>
-        <path d="M176 260 Q256 280 336 260 Q336 360 256 380 Q176 360 176 260" fill="url(#figure)" opacity="0.6"/>
-        <circle cx="220" cy="160" r="8" fill="${colorPalette[3]}"/>
-        <circle cx="292" cy="160" r="8" fill="${colorPalette[3]}"/>
-        <path d="M230 190 Q256 200 282 190" stroke="${colorPalette[3]}" stroke-width="3" fill="none"/>
-        <g transform="translate(256,400)">
-          ${Array.from({length: 12}, (_, i) => {
-            const angle = (i * 30) * Math.PI / 180;
-            const x = Math.cos(angle) * 60;
-            const y = Math.sin(angle) * 60;
-            return `<circle cx="${x}" cy="${y}" r="3" fill="${colorPalette[i % 4]}" opacity="0.6"/>`;
-          }).join('')}
-        </g>
-        <text x="256" y="480" text-anchor="middle" fill="${colorPalette[3]}" font-family="serif" font-size="16" opacity="0.8">
-          Mystical AI Artwork
+        
+        <!-- Background -->
+        <rect width="512" height="512" fill="url(#bgGrad)"/>
+        
+        <!-- Dramatic lighting overlay -->
+        <ellipse cx="350" cy="150" rx="200" ry="300" fill="url(#lightGrad)" opacity="0.4"/>
+        
+        <!-- Character silhouette/body -->
+        ${this.generateCharacterBody(isMale, skinColor, terracottaColor, tealColor, variation)}
+        
+        <!-- Hair -->
+        ${this.generateSeductiveHair(isMale, variation)}
+        
+        <!-- Face -->
+        ${this.generateSeductiveFace(isMale, skinColor, tealColor, goldColor, variation)}
+        
+        <!-- Mystical elements -->
+        ${this.generateMysticalElements(goldColor, tealColor)}
+        
+        <!-- Header text with dramatic styling -->
+        <text x="256" y="45" text-anchor="middle" font-family="serif" font-size="32" font-weight="bold" fill="${goldColor}" stroke="#2E0854" stroke-width="1">
+          Mystic Fortune
         </text>
+        <!-- Text shadow effect -->
+        <text x="258" y="47" text-anchor="middle" font-family="serif" font-size="32" font-weight="bold" fill="#2E0854" opacity="0.4">
+          Mystic Fortune
+        </text>
+        
+        <!-- Zodiac/mystical symbols -->
+        ${this.generateZodiacSymbols(goldColor)}
       </svg>
     `;
 
     return Buffer.from(svg, 'utf-8');
+  }
+
+  private generateCharacterBody(isMale: boolean, skinColor: string, terracottaColor: string, tealColor: string, variation: any): string {
+    if (isMale) {
+      return `
+        <!-- Male torso with enhanced definition -->
+        <path d="M190 280 Q256 260 322 280 Q340 380 256 420 Q172 380 190 280" fill="url(#skinGrad)" opacity="0.95"/>
+        <!-- Muscular chest -->
+        <ellipse cx="235" cy="310" rx="28" ry="22" fill="${terracottaColor}" opacity="0.4"/>
+        <ellipse cx="277" cy="310" rx="28" ry="22" fill="${terracottaColor}" opacity="0.4"/>
+        <!-- Defined abs -->
+        <ellipse cx="256" cy="340" rx="12" ry="8" fill="${terracottaColor}" opacity="0.3"/>
+        <ellipse cx="256" cy="355" rx="12" ry="8" fill="${terracottaColor}" opacity="0.3"/>
+        <ellipse cx="256" cy="370" rx="12" ry="8" fill="${terracottaColor}" opacity="0.3"/>
+        <!-- Shoulder definition -->
+        <ellipse cx="200" cy="285" rx="15" ry="25" fill="${tealColor}" opacity="0.3"/>
+        <ellipse cx="312" cy="285" rx="15" ry="25" fill="${tealColor}" opacity="0.3"/>
+      `;
+    } else {
+      return `
+        <!-- Female torso with enhanced curves -->
+        <path d="M200 280 Q256 265 312 280 Q325 380 256 410 Q187 380 200 280" fill="url(#skinGrad)" opacity="0.95"/>
+        <!-- Enhanced bust -->
+        <ellipse cx="230" cy="305" rx="32" ry="28" fill="${terracottaColor}" opacity="0.35"/>
+        <ellipse cx="282" cy="305" rx="32" ry="28" fill="${terracottaColor}" opacity="0.35"/>
+        <!-- Cleavage shadow -->
+        <path d="M245 290 Q256 300 267 290" stroke="${terracottaColor}" stroke-width="2" fill="none" opacity="0.4"/>
+        <!-- Waist curve -->
+        <ellipse cx="256" cy="350" rx="40" ry="18" fill="${skinColor}" opacity="0.9"/>
+        <!-- Hip curve -->
+        <ellipse cx="256" cy="385" rx="55" ry="25" fill="${skinColor}" opacity="0.8"/>
+        <!-- Sensual highlighting -->
+        <ellipse cx="215" cy="320" rx="8" ry="20" fill="${tealColor}" opacity="0.2"/>
+        <ellipse cx="297" cy="320" rx="8" ry="20" fill="${tealColor}" opacity="0.2"/>
+      `;
+    }
+  }
+
+  private generateSeductiveHair(isMale: boolean, variation: any): string {
+    if (isMale) {
+      return `
+        <!-- Male styled hair with dramatic flair -->
+        <path d="M165 110 Q256 65 347 110 Q360 150 340 175 Q320 190 300 185 Q280 180 256 170 Q232 180 212 185 Q192 190 172 175 Q152 150 165 110" fill="url(#hairGrad)" opacity="0.92"/>
+        <!-- Hair volume and texture -->
+        <path d="M180 125 Q220 115 256 120 Q292 115 332 125" stroke="#1A0F08" stroke-width="2.5" fill="none" opacity="0.7"/>
+        <path d="M190 140 Q230 130 256 135 Q282 130 322 140" stroke="#2A1F18" stroke-width="1.5" fill="none" opacity="0.5"/>
+        <!-- Side sweep -->
+        <path d="M175 130 Q200 125 225 130 Q240 135 255 140" stroke="#0A0A0A" stroke-width="1" fill="none" opacity="0.6"/>
+      `;
+    } else {
+      return `
+        <!-- Female voluminous flowing hair -->
+        <path d="M150 110 Q256 55 362 110 Q385 180 370 240 Q355 280 335 310 Q315 330 295 340 Q275 320 256 300 Q237 320 217 340 Q197 330 177 310 Q157 280 142 240 Q127 180 150 110" fill="url(#hairGrad)" opacity="0.94"/>
+        <!-- Hair layers and volume -->
+        <path d="M160 130 Q200 120 240 125 Q280 120 320 130 Q340 140 360 155" stroke="#1A0F08" stroke-width="2" fill="none" opacity="0.6"/>
+        <path d="M170 160 Q210 150 250 155 Q290 150 330 160 Q350 170 365 185" stroke="#2A1F18" stroke-width="1.8" fill="none" opacity="0.5"/>
+        <path d="M175 190 Q215 180 255 185 Q295 180 335 190 Q355 200 370 215" stroke="#0A0A0A" stroke-width="1.5" fill="none" opacity="0.4"/>
+        <!-- Flowing strands -->
+        <path d="M180 220 Q200 210 220 220 Q240 210 260 220 Q280 210 300 220 Q320 210 340 220" stroke="#0A0A0A" stroke-width="1.2" fill="none" opacity="0.35"/>
+        <path d="M185 250 Q205 240 225 250 Q245 240 265 250 Q285 240 305 250 Q325 240 345 250" stroke="#1A0F08" stroke-width="1" fill="none" opacity="0.3"/>
+        <!-- Hair highlights -->
+        <path d="M200 140 Q230 135 260 140" stroke="#4A3F38" stroke-width="1" fill="none" opacity="0.4"/>
+        <path d="M190 170 Q220 165 250 170" stroke="#4A3F38" stroke-width="1" fill="none" opacity="0.3"/>
+      `;
+    }
+  }
+
+  private generateSeductiveFace(isMale: boolean, skinColor: string, tealColor: string, goldColor: string, variation: any): string {
+    const eyeY = isMale ? 160 : 155;
+    const lipY = isMale ? 195 : 190;
+    
+    return `
+      <!-- Face shape -->
+      <ellipse cx="256" cy="170" rx="65" ry="75" fill="url(#skinGrad)" opacity="0.98"/>
+      
+      <!-- Enhanced eyes with sultry look -->
+      <ellipse cx="235" cy="${eyeY}" rx="15" ry="10" fill="white" opacity="0.9"/>
+      <ellipse cx="277" cy="${eyeY}" rx="15" ry="10" fill="white" opacity="0.9"/>
+      <ellipse cx="235" cy="${eyeY}" rx="12" ry="8" fill="${tealColor}" opacity="0.9"/>
+      <ellipse cx="277" cy="${eyeY}" rx="12" ry="8" fill="${tealColor}" opacity="0.9"/>
+      <circle cx="235" cy="${eyeY}" r="7" fill="url(#eyeGrad)"/>
+      <circle cx="277" cy="${eyeY}" r="7" fill="url(#eyeGrad)"/>
+      <circle cx="237" cy="${eyeY - 2}" r="2.5" fill="white" opacity="0.9"/>
+      <circle cx="279" cy="${eyeY - 2}" r="2.5" fill="white" opacity="0.9"/>
+      
+      <!-- Dramatic eyelashes -->
+      <path d="M220 ${eyeY - 8} Q230 ${eyeY - 12} 240 ${eyeY - 10} Q245 ${eyeY - 11} 250 ${eyeY - 8}" stroke="#000" stroke-width="2" fill="none" opacity="0.8"/>
+      <path d="M262 ${eyeY - 8} Q267 ${eyeY - 11} 272 ${eyeY - 10} Q282 ${eyeY - 12} 292 ${eyeY - 8}" stroke="#000" stroke-width="2" fill="none" opacity="0.8"/>
+      
+      <!-- Seductive eyebrows -->
+      <path d="M218 ${eyeY - 18} Q235 ${eyeY - 22} 252 ${eyeY - 18}" stroke="#2A2A2A" stroke-width="3" fill="none" opacity="0.9"/>
+      <path d="M260 ${eyeY - 18} Q277 ${eyeY - 22} 294 ${eyeY - 18}" stroke="#2A2A2A" stroke-width="3" fill="none" opacity="0.9"/>
+      
+      <!-- Eye makeup/shadow -->
+      <ellipse cx="235" cy="${eyeY - 5}" rx="18" ry="8" fill="${goldColor}" opacity="0.3"/>
+      <ellipse cx="277" cy="${eyeY - 5}" rx="18" ry="8" fill="${goldColor}" opacity="0.3"/>
+      
+      <!-- Refined nose -->
+      <ellipse cx="256" cy="178" rx="4" ry="8" fill="${skinColor}" opacity="0.6"/>
+      <path d="M252 182 Q256 185 260 182" stroke="${skinColor}" stroke-width="1" fill="none" opacity="0.4"/>
+      
+      <!-- Full, sensual lips -->
+      <ellipse cx="256" cy="${lipY}" rx="18" ry="7" fill="#D85570" opacity="0.9"/>
+      <ellipse cx="256" cy="${lipY - 1}" rx="16" ry="5" fill="#E86580" opacity="0.8"/>
+      <path d="M238 ${lipY} Q256 ${lipY + 5} 274 ${lipY}" stroke="#C44560" stroke-width="1.5" fill="none" opacity="0.7"/>
+      <ellipse cx="256" cy="${lipY - 2}" rx="8" ry="2" fill="white" opacity="0.4"/>
+      
+      <!-- Enhanced cheekbones -->
+      <ellipse cx="215" cy="175" rx="12" ry="20" fill="${goldColor}" opacity="0.25"/>
+      <ellipse cx="297" cy="175" rx="12" ry="20" fill="${goldColor}" opacity="0.25"/>
+      
+      <!-- Jawline definition -->
+      <path d="M200 200 Q256 215 312 200" stroke="${goldColor}" stroke-width="1" fill="none" opacity="0.3"/>
+    `;
+  }
+
+  private generateMysticalElements(goldColor: string, tealColor: string): string {
+    return `
+      <!-- Dramatic mystical orbs -->
+      <circle cx="120" cy="380" r="12" fill="${goldColor}" opacity="0.7">
+        <animate attributeName="opacity" values="0.7;1;0.7" dur="3s" repeatCount="indefinite"/>
+        <animate attributeName="r" values="12;15;12" dur="3s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="392" cy="380" r="12" fill="${tealColor}" opacity="0.7">
+        <animate attributeName="opacity" values="0.7;1;0.7" dur="2.5s" repeatCount="indefinite"/>
+        <animate attributeName="r" values="12;15;12" dur="2.5s" repeatCount="indefinite"/>
+      </circle>
+      
+      <!-- Energy swirls -->
+      <path d="M100 360 Q130 340 160 360 Q190 380 220 360" stroke="${goldColor}" stroke-width="2" fill="none" opacity="0.5">
+        <animate attributeName="opacity" values="0.5;0.8;0.5" dur="4s" repeatCount="indefinite"/>
+      </path>
+      <path d="M412 360 Q382 340 352 360 Q322 380 292 360" stroke="${tealColor}" stroke-width="2" fill="none" opacity="0.5">
+        <animate attributeName="opacity" values="0.5;0.8;0.5" dur="3.5s" repeatCount="indefinite"/>
+      </path>
+      
+      <!-- Floating energy particles -->
+      <g opacity="0.6">
+        <circle cx="160" cy="320" r="3" fill="${goldColor}">
+          <animate attributeName="cy" values="320;300;320" dur="4s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.6;1;0.6" dur="4s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="352" cy="340" r="3" fill="${tealColor}">
+          <animate attributeName="cy" values="340;320;340" dur="3.5s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.6;1;0.6" dur="3.5s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="180" cy="450" r="2.5" fill="${goldColor}">
+          <animate attributeName="cy" values="450;430;450" dur="5s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="332" cy="470" r="2.5" fill="${tealColor}">
+          <animate attributeName="cy" values="470;450;470" dur="4.5s" repeatCount="indefinite"/>
+        </circle>
+      </g>
+      
+      <!-- Dramatic corner ornaments -->
+      <g opacity="0.6" fill="${goldColor}">
+        <path d="M40 40 Q60 50 80 40 Q60 60 40 80 Q50 60 40 40"/>
+        <path d="M472 40 Q452 50 432 40 Q452 60 472 80 Q462 60 472 40"/>
+        <path d="M40 472 Q60 462 80 472 Q60 452 40 432 Q50 452 40 472"/>
+        <path d="M472 472 Q452 462 432 472 Q452 452 472 432 Q462 452 472 472"/>
+      </g>
+    `;
+  }
+
+  private generateZodiacSymbols(goldColor: string): string {
+    const symbols = ['♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓'];
+    const positions = [
+      { x: 80, y: 150 }, { x: 432, y: 150 }, { x: 80, y: 300 }, { x: 432, y: 300 }
+    ];
+    
+    return positions.map((pos, i) => `
+      <circle cx="${pos.x}" cy="${pos.y}" r="20" fill="${goldColor}" opacity="0.3"/>
+      <text x="${pos.x}" y="${pos.y + 6}" text-anchor="middle" font-family="serif" font-size="20" fill="${goldColor}" opacity="0.8">
+        ${symbols[i * 3 % symbols.length]}
+      </text>
+    `).join('');
+  }
+
+  private generateFallbackSVG(prompt: string): Buffer {
+    // Use the new seductive character generation as fallback too
+    return this.generateSeductiveCharacterSVG(prompt);
   }
 
   private async generateText(prompt: string): Promise<string> {
@@ -426,22 +625,22 @@ class AIImageService {
   private getMysticalPrompts(category: FortuneCategoryType): string[] {
     const basePrompts = {
       love: [
-        "ethereal goddess of love with flowing golden hair, surrounded by rose petals and soft pink light, mystical fantasy art, divine beauty",
-        "enchanting fairy of romance with butterfly wings, holding a glowing heart crystal, magical forest setting, fantasy illustration",
-        "celestial angel of love with silver wings, gentle smile, surrounded by floating hearts and stardust, heavenly atmosphere",
-        "mystical venus goddess emerging from pearl shell, ocean waves, romantic sunset, classical beauty with magical aura"
+        "seductive love goddess with flowing hair and dramatic lighting, warm terracotta and cool teal colors, deep purple background, gold serif Mystic Fortune header, borderline NSFW sex appeal, intense dramatic lighting",
+        "alluring romantic oracle with mesmerizing eyes, traditional tattoo art style, retro flair with complex ornamentation, vibrant colors with high contrast, provocative pose",
+        "enchanting love priestess with captivating beauty, warm golden glow mixed with terracotta and teal accents, eerie creepy atmosphere, seductive woman with intense dramatic lighting",
+        "mystical venus with sensual curves, classic oil painting style with warm golden glow, high contrast seductive woman, deep purple background with golden circular mystical icons"
       ],
       career: [
-        "powerful sorceress with golden staff, flowing robes, casting success spells, magical library background, fantasy art",
-        "elegant businesswoman with mystical aura, surrounded by floating coins and success symbols, professional fantasy portrait",
-        "wise oracle with crystal ball showing visions of success, flowing mystical robes, ancient temple setting",
-        "divine goddess of wisdom with owl companion, holding scrolls of knowledge, mystical golden light"
+        "powerful seductive sorceress with intense gaze, vibrant 4k retro style with complex ornamentation, dramatically lit in warm terracotta and cool teal, deep purple background with Mystic Fortune header",
+        "alluring business oracle with magnetic presence, traditional tattoo art print style in 4k resolution, high contrast seductive figure, vibrant warm terracotta and cool teal colors",
+        "captivating success goddess with piercing eyes, bright vibrant cartoon clipart style, warm terracotta and cool teal palette, intense dramatic lighting on seductive subject",
+        "mysterious career advisor with sensual appeal, intricate origami-style with warm terracotta and cool teal, high contrast dramatic lighting, golden interconnected circular mystical symbols"
       ],
       general: [
-        "mystical fortune teller with crystal ball, flowing cosmic robes, surrounded by tarot cards and candles, magical atmosphere",
-        "ethereal cosmic goddess floating in starry space, flowing hair like nebula, celestial beauty, fantasy art",
-        "enchanting witch with purple hair, casting magical spells, surrounded by glowing crystals and mystical symbols",
-        "divine oracle priestess in ancient temple, holding mystical artifacts, soft magical lighting, fantasy portrait"
+        "seductive mystical fortune teller with hypnotic beauty, 4k resolution with vibrant color palette and top-down perspective, retro flair with traditional tattoo art influence, borderline NSFW appeal",
+        "alluring cosmic oracle with enchanting presence, eerie creepy long-exposure photography style with terracotta and teal accents, intense dramatic lighting on seductive figure",
+        "captivating witch with magnetic charm, vibrant traditional tattoo art print style, 4k top-down perspective, dramatic lighting in warm terracotta and cool teal with deep purple background",
+        "provocative mystical advisor with irresistible appeal, classic oil painting cartoon clipart style, warm golden glow with terracotta and teal, high contrast seductive lighting, gold serif Mystic Fortune header"
       ]
     };
 
@@ -584,14 +783,16 @@ class AIImageService {
     prompt: string;
   }> {
     const promotionalPrompts = [
-      "mystical crystal ball with swirling cosmic energy, magical fortune telling setup, candles and tarot cards, atmospheric lighting",
-      "beautiful tarot card spread on velvet cloth, crystals and candles around, mystical atmosphere, magical lighting",
-      "enchanting fortune teller's room with crystal balls, ancient books, mystical artifacts, soft magical glow",
-      "cosmic galaxy with constellation patterns forming mystical symbols, deep space, spiritual energy, divine light"
+      "seductive mystical fortune teller with piercing gaze, dramatic terracotta and teal lighting, deep purple background, gold Mystic Fortune header, sultry pose, borderline NSFW appeal",
+      "alluring tarot reader with hypnotic beauty, flowing hair, intense dramatic shadows, warm golden glow, mystical symbols, sensual expression, high contrast lighting",
+      "captivating oracle with mesmerizing eyes, eerie atmospheric lighting, terracotta skin tones, cool teal accents, deep purple void background, golden ornamental details",
+      "enchanting cosmic goddess with voluptuous curves, vibrant color palette, retro art style, complex mystical ornamentation, dramatic pose, borderline safe-for-work sex appeal",
+      "mysterious fortune teller with seductive smile, candlelight ambiance, flowing robes, enhanced feminine features, golden mystical aura, deep purple mystical background",
+      "bewitching mystic with alluring gaze, dramatic chiaroscuro lighting, warm terracotta skin, cool teal highlights, ornate golden jewelry, provocative but tasteful pose"
     ];
 
     const selectedPrompt = promotionalPrompts[Math.floor(Math.random() * promotionalPrompts.length)];
-    const enhancedPrompt = `${selectedPrompt}, high quality, professional, mystical branding, magical atmosphere, premium quality`;
+    const enhancedPrompt = `${selectedPrompt}, high quality, professional mystical branding, maximum viral appeal`;
 
     const imageBuffer = await this.generateImage(enhancedPrompt);
 
