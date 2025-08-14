@@ -4,6 +4,7 @@
 A comprehensive fortune telling web application that provides users with mystical insights through multiple divination methods including Crystal Ball readings, Daily Horoscopes, and Tarot Card spreads. The application features a dark mystical theme with purple and golden accents, creating an authentic spiritual experience.
 
 ## Recent Changes
+- **August 2025**: **✨ ETHEREAL AESTHETIC UPDATE** - Updated AI image generation prompts to match user's specific ethereal vision: barely-there figures in whisper-thin silk, morning light with gossamer qualities, silver/pale gold threads, ivory/blush/pale lilac/moon-glow white palette, no sharp edges, breath of elegance suspended in time, fantasy portrait inspired by silent dreams
 - **August 2025**: **🎮 INTERACTIVE TAROT SYSTEM** - Implemented fully interactive Tarot card reading with 3D flip animations, multiple spread types (single, three card, celtic cross), and visual card images
 - **August 2025**: **🎁 DAILY REWARD SYSTEM** - Added prominent daily reward system with streak tracking, Mystic Coins economy, and 7-day reward cycle to maximize user retention
 - **August 2025**: **🛠️ ENHANCED ADMIN PANEL** - Built comprehensive admin control center with fluent user management, promotional content creation, real-time analytics, and quick action buttons

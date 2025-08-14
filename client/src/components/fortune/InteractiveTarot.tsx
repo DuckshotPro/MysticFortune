@@ -4,13 +4,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar, faMoon, faSun, faHeart, faCoins, faCrown, faWandMagicSparkles, faBolt, faGem } from "@fortawesome/free-solid-svg-icons";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-// Import images using the @assets alias for proper bundling
-import mysticalImage1 from "@assets/starryai_mnobp_1752189432809.png";
-import mysticalImage2 from "@assets/starryai_mnobp_1755049481457.png";
-import mysticalImage3 from "@assets/starryai_j633m_1755049481472.png";
-import mysticalImage4 from "@assets/Screenshot_2025-04-18-02-45-35-21_2e7ff5331ca438a3b289c023958225e2.jpg";
-import mysticalImage5 from "@assets/Screenshot_2025-07-10-18-48-34-27_40deb401b9ffe8e1df2f1cc5ba480b12_1752191537366.jpg";
-import mysticalImage6 from "@assets/Screenshot_2025-07-10-18-48-34-27_40deb401b9ffe8e1df2f1cc5ba480b12_1752191719659.jpg";
+// Import ethereal character images using the @assets alias for proper bundling
+import etherealFigure1 from "@assets/generated_images/Ethereal_fortune_teller_figure_dd1645ae.png";
+import etherealFigure2 from "@assets/generated_images/Mystical_tarot_reader_portrait_1cd6954d.png";
+import etherealFigure3 from "@assets/generated_images/Crystal_ball_fortune_reader_b0c2a4eb.png";
+import etherealFigure4 from "@assets/generated_images/Horoscope_mystic_guide_8fb8eb98.png";
 
 interface TarotCard {
   id: number;
@@ -23,16 +21,16 @@ interface TarotCard {
 }
 
 const tarotDeck: TarotCard[] = [
-  { id: 1, name: "The Fool", meaning: "New beginnings, spontaneity, innocence", reversedMeaning: "Recklessness, risk-taking", icon: faStar, color: "from-yellow-400 to-amber-500", backImage: mysticalImage1 },
-  { id: 2, name: "The Magician", meaning: "Manifestation, resourcefulness, power", reversedMeaning: "Manipulation, poor planning", icon: faWandMagicSparkles, color: "from-purple-400 to-indigo-500", backImage: mysticalImage2 },
-  { id: 3, name: "The High Priestess", meaning: "Intuition, sacred knowledge, divine feminine", reversedMeaning: "Secrets, disconnection", icon: faMoon, color: "from-blue-400 to-purple-500", backImage: mysticalImage3 },
-  { id: 4, name: "The Empress", meaning: "Femininity, beauty, nature, abundance", reversedMeaning: "Creative block, dependence", icon: faCrown, color: "from-green-400 to-emerald-500", backImage: mysticalImage4 },
-  { id: 5, name: "The Emperor", meaning: "Authority, structure, control, father figure", reversedMeaning: "Tyranny, rigidity", icon: faCrown, color: "from-red-400 to-orange-500", backImage: mysticalImage5 },
-  { id: 6, name: "The Lovers", meaning: "Love, harmony, relationships, values", reversedMeaning: "Disharmony, imbalance", icon: faHeart, color: "from-pink-400 to-rose-500", backImage: mysticalImage6 },
-  { id: 7, name: "The Chariot", meaning: "Control, willpower, success, determination", reversedMeaning: "Lack of control, aggression", icon: faBolt, color: "from-sky-400 to-blue-500" },
-  { id: 8, name: "Strength", meaning: "Inner strength, courage, patience, control", reversedMeaning: "Weakness, self-doubt", icon: faGem, color: "from-amber-400 to-yellow-500" },
-  { id: 9, name: "The Hermit", meaning: "Soul searching, introspection, inner guidance", reversedMeaning: "Isolation, loneliness", icon: faStar, color: "from-indigo-400 to-purple-500" },
-  { id: 10, name: "Wheel of Fortune", meaning: "Good luck, karma, life cycles, destiny", reversedMeaning: "Bad luck, lack of control", icon: faStar, color: "from-teal-400 to-cyan-500" }
+  { id: 1, name: "The Fool", meaning: "New beginnings, spontaneity, innocence", reversedMeaning: "Recklessness, risk-taking", icon: faStar, color: "from-yellow-400 to-amber-500", backImage: etherealFigure1 },
+  { id: 2, name: "The Magician", meaning: "Manifestation, resourcefulness, power", reversedMeaning: "Manipulation, poor planning", icon: faWandMagicSparkles, color: "from-purple-400 to-indigo-500", backImage: etherealFigure2 },
+  { id: 3, name: "The High Priestess", meaning: "Intuition, sacred knowledge, divine feminine", reversedMeaning: "Secrets, disconnection", icon: faMoon, color: "from-blue-400 to-purple-500", backImage: etherealFigure3 },
+  { id: 4, name: "The Empress", meaning: "Femininity, beauty, nature, abundance", reversedMeaning: "Creative block, dependence", icon: faCrown, color: "from-green-400 to-emerald-500", backImage: etherealFigure4 },
+  { id: 5, name: "The Emperor", meaning: "Authority, structure, control, father figure", reversedMeaning: "Tyranny, rigidity", icon: faCrown, color: "from-red-400 to-orange-500", backImage: etherealFigure1 },
+  { id: 6, name: "The Lovers", meaning: "Love, harmony, relationships, values", reversedMeaning: "Disharmony, imbalance", icon: faHeart, color: "from-pink-400 to-rose-500", backImage: etherealFigure2 },
+  { id: 7, name: "The Chariot", meaning: "Control, willpower, success, determination", reversedMeaning: "Lack of control, aggression", icon: faBolt, color: "from-sky-400 to-blue-500", backImage: etherealFigure3 },
+  { id: 8, name: "Strength", meaning: "Inner strength, courage, patience, control", reversedMeaning: "Weakness, self-doubt", icon: faGem, color: "from-amber-400 to-yellow-500", backImage: etherealFigure4 },
+  { id: 9, name: "The Hermit", meaning: "Soul searching, introspection, inner guidance", reversedMeaning: "Isolation, loneliness", icon: faStar, color: "from-indigo-400 to-purple-500", backImage: etherealFigure1 },
+  { id: 10, name: "Wheel of Fortune", meaning: "Good luck, karma, life cycles, destiny", reversedMeaning: "Bad luck, lack of control", icon: faStar, color: "from-teal-400 to-cyan-500", backImage: etherealFigure2 }
 ];
 
 export default function InteractiveTarot() {
