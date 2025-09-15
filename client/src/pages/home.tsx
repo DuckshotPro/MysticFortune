@@ -14,15 +14,41 @@ import AdBanner from "@/components/monetization/AdBanner";
 import ContentPreview from "@/components/content/ContentPreview";
 import { SoundControls } from "@/components/ui/sound-controls";
 import { shouldShowAds } from "@/lib/premiumUtils";
+import OnboardingWizard from "@/components/onboarding/OnboardingWizard";
+import GuidedTour from "@/components/onboarding/GuidedTour";
+import DailyStreakTracker from "@/components/engagement/DailyStreakTracker";
+import ViralShareSystem from "@/components/social/ViralShareSystem";
+import { errorHandler, handleApiError, ErrorType } from "@/lib/errorHandling";
 
 export default function Home() {
   const [showAds, setShowAds] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showGuidedTour, setShowGuidedTour] = useState(false);
+  const [userOnboarded, setUserOnboarded] = useState(false);
+  const [currentFortune, setCurrentFortune] = useState<any>(null);
 
-  // Check premium status to determine if ads should be shown
+  // Check premium status and onboarding status
   useEffect(() => {
     setShowAds(shouldShowAds());
 
-    // Listen for storage changes (in case premium status changes in another tab)
+    // Check if user needs onboarding
+    const hasCompletedOnboarding = localStorage.getItem('mystic-onboarding-completed');
+    const hasSkippedOnboarding = localStorage.getItem('mystic-onboarding-skipped');
+    const hasCompletedTour = localStorage.getItem('mystic-tour-completed');
+    const hasSkippedTour = localStorage.getItem('mystic-tour-skipped');
+    
+    if (!hasCompletedOnboarding && !hasSkippedOnboarding) {
+      setShowOnboarding(true);
+    } else {
+      setUserOnboarded(true);
+      
+      // Show guided tour for returning users who haven't seen it
+      if (!hasCompletedTour && !hasSkippedTour) {
+        setTimeout(() => setShowGuidedTour(true), 2000);
+      }
+    }
+
+    // Listen for storage changes
     const handleStorageChange = () => {
       setShowAds(shouldShowAds());
     };
@@ -32,6 +58,34 @@ export default function Home() {
       window.removeEventListener('storage', handleStorageChange);
     };
   }, []);
+
+  const handleOnboardingComplete = (data: any) => {
+    console.log('Onboarding completed with data:', data);
+    localStorage.setItem('mystic-onboarding-completed', 'true');
+    localStorage.setItem('mystic-user-preferences', JSON.stringify(data));
+    setShowOnboarding(false);
+    setUserOnboarded(true);
+    
+    // Show tour after onboarding
+    setTimeout(() => setShowGuidedTour(true), 1000);
+  };
+
+  const handleOnboardingSkip = () => {
+    localStorage.setItem('mystic-onboarding-skipped', 'true');
+    setShowOnboarding(false);
+    setUserOnboarded(true);
+    
+    // Still show tour for skipped onboarding
+    setTimeout(() => setShowGuidedTour(true), 1000);
+  };
+
+  const handleTourComplete = () => {
+    setShowGuidedTour(false);
+  };
+
+  const handleTourSkip = () => {
+    setShowGuidedTour(false);
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-purple-950 text-white font-['Montserrat']">
@@ -45,6 +99,37 @@ export default function Home() {
         </div>
 
         <CrystalBall />
+        
+        {/* Engagement Features */}
+        {userOnboarded && (
+          <div className="container mx-auto px-4 py-8">
+            <div className="grid md:grid-cols-2 gap-8">
+              {/* Daily Streak Tracker */}
+              <div data-tour="daily-streak">
+                <DailyStreakTracker />
+              </div>
+              
+              {/* Viral Share System */}
+              {currentFortune && (
+                <div data-tour="share-system">
+                  <ViralShareSystem 
+                    content={{
+                      fortuneText: currentFortune.content,
+                      category: currentFortune.category,
+                      zodiacSign: "Mystical Soul",
+                      userName: "Fortune Seeker"
+                    }}
+                    onShare={(platform) => {
+                      console.log(`Shared to ${platform}`);
+                      // Track sharing analytics
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+        
         <ContentPreview />
 
         {/* Inline Ad - only shown for non-premium users */}
@@ -74,6 +159,21 @@ export default function Home() {
       {showAds && <AdBanner variant="footer" />}
 
       <Footer />
+      
+      {/* Onboarding Wizard */}
+      {showOnboarding && (
+        <OnboardingWizard 
+          onComplete={handleOnboardingComplete}
+          onSkip={handleOnboardingSkip}
+        />
+      )}
+      
+      {/* Guided Tour */}
+      <GuidedTour 
+        isActive={showGuidedTour}
+        onComplete={handleTourComplete}
+        onSkip={handleTourSkip}
+      />
     </div>
   );
 }
