@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes, faCrown, faStar, faGem } from "@fortawesome/free-solid-svg-icons";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 
 interface AdBannerProps {
   variant?: "sidebar" | "inline" | "footer";
@@ -16,11 +17,150 @@ function AdBanner({ variant = "footer", showCloseButton = true }: AdBannerProps)
   const { toast } = useToast();
   const [, navigate] = useLocation();
 
+  // Fetch dynamic promotional content from admin-generated content
+  const { data: promoContent } = useQuery({
+    queryKey: ['/api/promotional-content', variant],
+    queryFn: async () => {
+      const response = await fetch(`/api/promotional-content?adType=${variant}&active=true`);
+      if (!response.ok) throw new Error('Failed to fetch promotional content');
+      return response.json();
+    },
+    refetchInterval: 300000, // Refresh every 5 minutes
+    staleTime: 60000, // Consider data stale after 1 minute
+  });
+
   const handlePremiumClick = () => {
     navigate("/premium");
   };
 
+  const handleAdClick = async (contentId?: number) => {
+    // Track ad click for analytics
+    if (contentId) {
+      try {
+        await fetch('/api/promotional-content/track-click', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contentId, variant })
+        });
+      } catch (error) {
+        console.warn('Failed to track ad click:', error);
+      }
+    }
+  };
+
   if (!isVisible) return null;
+
+  // Use dynamic content if available, otherwise fall back to default content
+  const content = promoContent && promoContent.length > 0 
+    ? promoContent[Math.floor(Math.random() * promoContent.length)]
+    : null;
+
+  // If we have dynamic content, use it instead of the static content
+  if (content && variant === "footer") {
+    return (
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-gradient-to-r from-purple-900 to-indigo-900 p-3 border-t-2 border-amber-500/40 fixed bottom-0 left-0 right-0 z-40 shadow-lg relative overflow-hidden"
+      >
+        <div className="absolute top-0 left-1/4 w-40 h-40 bg-amber-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute top-0 right-1/4 w-40 h-40 bg-purple-600/20 rounded-full blur-3xl"></div>
+        
+        <div className="container mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 relative">
+          <div className="flex items-center">
+            <div className="mr-2 sm:mr-4">
+              <span className="bg-amber-500 text-purple-950 px-2 py-1 rounded text-xs font-bold">
+                PROMO
+              </span>
+            </div>
+            <div className="flex items-center">
+              <FontAwesomeIcon icon={faCrown} className="text-amber-400 mr-2 hidden sm:block" />
+              <p className="text-white text-sm">
+                <span className="font-semibold">{content.title}:</span> 
+                <span className="hidden sm:inline"> {content.content}</span>
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Button 
+              size="sm" 
+              className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-purple-950 text-xs whitespace-nowrap shadow-md"
+              onClick={() => {
+                handleAdClick(content.id);
+                handlePremiumClick();
+              }}
+            >
+              <FontAwesomeIcon icon={faCrown} className="mr-1" /> 
+              Discover More
+            </Button>
+            {showCloseButton && (
+              <button 
+                onClick={() => setIsVisible(false)}
+                className="text-white/70 hover:text-white bg-purple-800/50 hover:bg-purple-800 p-1 rounded-full"
+                aria-label="Close advertisement"
+              >
+                <FontAwesomeIcon icon={faTimes} />
+              </button>
+            )}
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
+  if (content && variant === "inline") {
+    return (
+      <motion.div 
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-gradient-to-r from-purple-900/70 to-indigo-900/70 p-4 rounded-lg my-6 border-2 border-amber-500/40 backdrop-blur-sm relative overflow-hidden"
+      >
+        <div className="absolute -bottom-12 -right-12 w-40 h-40 bg-amber-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute -top-12 -left-12 w-40 h-40 bg-purple-600/20 rounded-full blur-3xl"></div>
+        
+        <div className="flex flex-col md:flex-row items-start relative">
+          <div className="flex-grow">
+            <div className="flex items-center gap-2">
+              <p className="text-xs font-bold bg-amber-500/90 text-purple-950 px-2 py-0.5 rounded">FEATURED</p>
+              {showCloseButton && (
+                <button 
+                  onClick={() => setIsVisible(false)}
+                  className="text-white/50 hover:text-white ml-auto"
+                >
+                  <FontAwesomeIcon icon={faTimes} className="text-xs" />
+                </button>
+              )}
+            </div>
+            
+            <div className="md:flex items-center gap-4 mt-2">
+              <div className="w-full md:w-24 h-20 md:h-20 bg-gradient-to-r from-purple-800 to-indigo-800 rounded mb-3 md:mb-0 flex items-center justify-center shrink-0">
+                <FontAwesomeIcon icon={faStar} className="text-amber-400 text-xl" />
+              </div>
+              
+              <div>
+                <h4 className="font-['Cinzel'] text-amber-400 text-sm">{content.title}</h4>
+                <p className="text-white text-xs my-1">
+                  {content.content}
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <Button 
+            size="sm" 
+            className="bg-amber-500 hover:bg-amber-400 text-purple-950 text-xs self-center mt-3 md:mt-0 md:ml-4 w-full md:w-auto"
+            onClick={() => {
+              handleAdClick(content.id);
+              handlePremiumClick();
+            }}
+          >
+            Explore Now
+          </Button>
+        </div>
+      </motion.div>
+    );
+  }
 
   // Different styled ad banners based on placement
   if (variant === "sidebar") {

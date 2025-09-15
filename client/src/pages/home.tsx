@@ -3,6 +3,8 @@ import { motion } from "framer-motion";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Hero from "@/components/layout/Hero";
+import DailyRewardSystem from "@/components/rewards/DailyRewardSystem";
+import InteractiveTarot from "@/components/fortune/InteractiveTarot";
 import CrystalBall from "@/components/fortune/CrystalBall";
 import HoroscopeSection from "@/components/fortune/HoroscopeSection";
 import FortuneCards from "@/components/fortune/FortuneCards";
@@ -93,10 +95,16 @@ export default function Home() {
       <main className="flex-grow pb-16" id="main-content">
         <Hero />
 
+        {/* DAILY REWARDS - FRONT AND CENTER */}
+        <DailyRewardSystem />
+
         {/* Sound Controls - Fixed Position */}
         <div className="fixed top-20 right-4 z-40">
           <SoundControls compact />
         </div>
+
+        {/* INTERACTIVE TAROT - VISUAL AND ENGAGING */}
+        <InteractiveTarot />
 
         <CrystalBall />
         

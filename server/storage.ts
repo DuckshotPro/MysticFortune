@@ -11,7 +11,9 @@ import { eq, and } from "drizzle-orm";
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUserLastLogin(userId: number): Promise<void>;
   
   // Fortune methods
   getAllFortunes(): Promise<Fortune[]>;
@@ -31,6 +33,10 @@ export interface IStorage {
   // Horoscope methods
   getHoroscopeBySign(sign: ZodiacSignType): Promise<Horoscope | undefined>;
   createHoroscope(horoscope: InsertHoroscope): Promise<Horoscope>;
+  
+  // Promotional Content methods - Connect admin generator to live ads
+  getPromotionalContent(filters: { adType?: string; active?: boolean }): Promise<any[]>;
+  trackPromotionalClick(contentId: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -44,12 +50,24 @@ export class DatabaseStorage implements IStorage {
     return user || undefined;
   }
 
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user || undefined;
+  }
+
   async createUser(insertUser: InsertUser): Promise<User> {
     const [user] = await db
       .insert(users)
       .values(insertUser)
       .returning();
     return user;
+  }
+
+  async updateUserLastLogin(userId: number): Promise<void> {
+    await db
+      .update(users)
+      .set({ lastLoginAt: new Date() })
+      .where(eq(users.id, userId));
   }
 
   async getAllFortunes(): Promise<Fortune[]> {
@@ -118,6 +136,50 @@ export class DatabaseStorage implements IStorage {
 
   async getAllUsers(): Promise<User[]> {
     return await db.select().from(users);
+  }
+
+  // Promotional Content methods - Connect admin generator to live ads
+  async getPromotionalContent(filters: { adType?: string; active?: boolean }): Promise<any[]> {
+    // Mock promotional content - in production, this would come from the promotionalContent table
+    const mockContent = [
+      {
+        id: 1,
+        title: "Unlock Your Cosmic Destiny",
+        content: "Discover personalized readings with premium AI insights",
+        category: "premium_promo",
+        adType: filters.adType || "footer",
+        isActive: true,
+        targetAudience: "new_users",
+        clicks: 0,
+        impressions: 0
+      },
+      {
+        id: 2,
+        title: "Enhanced Spiritual Journey",
+        content: "Get detailed tarot interpretations and zodiac analysis",
+        category: "fortune_ads",
+        adType: filters.adType || "inline",
+        isActive: true,
+        targetAudience: "frequent_users",
+        clicks: 0,
+        impressions: 0
+      }
+    ];
+
+    let filtered = mockContent;
+    if (filters.adType) {
+      filtered = filtered.filter(content => content.adType === filters.adType);
+    }
+    if (filters.active !== undefined) {
+      filtered = filtered.filter(content => content.isActive === filters.active);
+    }
+
+    return filtered;
+  }
+
+  async trackPromotionalClick(contentId: number): Promise<void> {
+    // Mock click tracking - in production, this would update the promotionalContent table
+    console.log(`Promotional content ${contentId} clicked - tracking analytics`);
   }
 }
 

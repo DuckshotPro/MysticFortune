@@ -63,6 +63,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Prefix all routes with /api
   app.use("/api", router);
 
+  // User authentication routes
+  router.post("/auth/register", async (req, res) => {
+    try {
+      const { username, email, password, firstName, lastName, birthDate } = req.body;
+      
+      // Calculate zodiac sign from birth date
+      const zodiacSign = calculateZodiacSign(new Date(birthDate));
+      
+      const user = await storage.createUser({
+        username,
+        email,
+        password: password, // In production, hash the password
+        firstName,
+        lastName,
+        birthDate: new Date(birthDate),
+        zodiacSign,
+        authProvider: "local"
+      });
+      
+      // Generate JWT token (simple implementation)
+      const token = `user-${user.id}-${Date.now()}`;
+      
+      res.json({
+        success: true,
+        token,
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          zodiacSign: user.zodiacSign,
+          isPremium: user.isPremium
+        }
+      });
+    } catch (error: any) {
+      res.status(400).json({ success: false, message: error.message });
+    }
+  });
+
+  router.post("/auth/login", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      const user = await storage.getUserByEmail(email);
+      if (!user || user.password !== password) {
+        return res.status(401).json({ success: false, message: "Invalid credentials" });
+      }
+      
+      // Update last login
+      await storage.updateUserLastLogin(user.id);
+      
+      // Generate JWT token (simple implementation)
+      const token = `user-${user.id}-${Date.now()}`;
+      
+      res.json({
+        success: true,
+        token,
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          zodiacSign: user.zodiacSign,
+          isPremium: user.isPremium
+        }
+      });
+    } catch (error: any) {
+      res.status(400).json({ success: false, message: error.message });
+    }
+  });
+
   // Admin authentication routes
   router.post("/admin/login", async (req, res) => {
     try {
