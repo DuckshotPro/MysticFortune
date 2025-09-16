@@ -2,9 +2,9 @@ import { motion } from "framer-motion";
 import { fadeIn } from "@/lib/animations";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Star, Zap, Heart, Crystal } from "lucide-react";
+import { Sparkles, Star, Zap, Heart, Compass } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCrystalBall, faHandSparkles, faMagic } from "@fortawesome/free-solid-svg-icons";
+import { faGem, faHandSparkles, faMagic } from "@fortawesome/free-solid-svg-icons";
 
 export default function Hero() {
   const [currentText, setCurrentText] = useState(0);
@@ -21,7 +21,7 @@ export default function Hero() {
     { icon: Heart, text: "Will I find love?", color: "text-pink-400" },
     { icon: Zap, text: "What's my purpose?", color: "text-yellow-400" },
     { icon: Star, text: "What lies ahead?", color: "text-blue-400" },
-    { icon: Crystal, text: "Guide my path", color: "text-purple-400" }
+    { icon: Compass, text: "Guide my path", color: "text-purple-400" }
   ];
 
   useEffect(() => {
@@ -125,7 +125,7 @@ export default function Hero() {
                 animate={{ rotate: 360 }}
                 transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
               >
-                <FontAwesomeIcon icon={faCrystalBall} className="text-4xl text-amber-400" />
+                <FontAwesomeIcon icon={faGem} className="text-4xl text-amber-400" />
               </motion.div>
             </div>
           </div>

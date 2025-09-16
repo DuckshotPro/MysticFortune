@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Sparkles, Heart, Briefcase, Star, ArrowRight, ArrowLeft, Gift } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faGem, faCrystalBall, faHandSparkles } from "@fortawesome/free-solid-svg-icons";
+import { faGem, faHandSparkles } from "@fortawesome/free-solid-svg-icons";
 
 interface OnboardingData {
   name: string;
@@ -219,7 +219,7 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
         }}
         className="mb-6"
       >
-        <FontAwesomeIcon icon={faCrystalBall} className="text-6xl text-amber-400" />
+        <FontAwesomeIcon icon={faGem} className="text-6xl text-amber-400" />
       </motion.div>
       
       <p className="text-xl text-white/90 mb-8">
@@ -516,7 +516,7 @@ function CompletionStep({ data, onNext }: { data: OnboardingData, onNext: () => 
         size="lg"
         className="bg-gradient-to-r from-amber-500 via-purple-500 to-pink-500 hover:from-amber-600 hover:via-purple-600 hover:to-pink-600 text-white px-12 py-4 text-lg"
       >
-        <FontAwesomeIcon icon={faCrystalBall} className="mr-2" />
+        <FontAwesomeIcon icon={faGem} className="mr-2" />
         Enter My Mystical Experience
       </Button>
     </div>

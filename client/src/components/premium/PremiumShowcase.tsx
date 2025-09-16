@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Crown, Sparkles, Zap, Star, Gift, Lock, Check, X } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faGem, faCrystalBall, faMagic, faInfinity } from "@fortawesome/free-solid-svg-icons";
+import { faGem, faMagic, faInfinity } from "@fortawesome/free-solid-svg-icons";
 
 interface PremiumShowcaseProps {
   onUpgrade: () => void;
@@ -48,7 +48,7 @@ export default function PremiumShowcase({ onUpgrade, currentPlan = 'free' }: Pre
       name: "Cosmic Master",
       price: 19.99,
       originalPrice: 39.99,
-      icon: faCrystalBall,
+      icon: faInfinity,
       color: "from-amber-500 to-orange-500",
       features: [
         "Everything in Premium",
