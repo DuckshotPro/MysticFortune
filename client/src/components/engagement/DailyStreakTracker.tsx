@@ -70,7 +70,9 @@ export default function DailyStreakTracker() {
         
         // Show reward if not claimed today
         if (!updatedData.todaysClaimed) {
-          setTodaysReward(getDailyReward(newStreak));\n          setShowRewardModal(true);\n        }
+          setTodaysReward(getDailyReward(newStreak));
+          setShowRewardModal(true);
+        }
       } else {
         // Streak broken - reset
         const resetData = {
