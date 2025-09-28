@@ -1,0 +1,204 @@
+
+      <svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <!-- Background gradient -->
+          <radialGradient id="bgGrad" cx="50%" cy="30%" r="80%">
+            <stop offset="0%" style="stop-color:#6A1B9A;stop-opacity:1"/>
+            <stop offset="50%" style="stop-color:#4A148C;stop-opacity:1"/>
+            <stop offset="100%" style="stop-color:#2E0854;stop-opacity:1"/>
+          </radialGradient>
+          
+          <!-- Dramatic lighting gradients -->
+          <linearGradient id="lightGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#D2691E;stop-opacity:0.8"/>
+            <stop offset="50%" style="stop-color:#FFA500;stop-opacity:0.6"/>
+            <stop offset="100%" style="stop-color:#48CCCC;stop-opacity:0.4"/>
+          </linearGradient>
+          
+          <!-- Skin gradient -->
+          <radialGradient id="skinGrad" cx="40%" cy="30%" r="60%">
+            <stop offset="0%" style="stop-color:#F4A460;stop-opacity:1"/>
+            <stop offset="70%" style="stop-color:#D2691E;stop-opacity:0.3"/>
+            <stop offset="100%" style="stop-color:#2E0854;stop-opacity:0.2"/>
+          </radialGradient>
+          
+          <!-- Hair gradient -->
+          <linearGradient id="hairGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#2C1810;stop-opacity:1"/>
+            <stop offset="50%" style="stop-color:#48CCCC;stop-opacity:0.3"/>
+            <stop offset="100%" style="stop-color:#1A0F08;stop-opacity:1"/>
+          </linearGradient>
+          
+          <!-- Eye gradient -->
+          <radialGradient id="eyeGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" style="stop-color:#48CCCC;stop-opacity:1"/>
+            <stop offset="80%" style="stop-color:#FFA500;stop-opacity:0.8"/>
+            <stop offset="100%" style="stop-color:#000;stop-opacity:1"/>
+          </radialGradient>
+        </defs>
+        
+        <!-- Background -->
+        <rect width="512" height="512" fill="url(#bgGrad)"/>
+        
+        <!-- Dramatic lighting overlay -->
+        <ellipse cx="350" cy="150" rx="200" ry="300" fill="url(#lightGrad)" opacity="0.4"/>
+        
+        <!-- Character silhouette/body -->
+        
+        <!-- Female torso with enhanced curves -->
+        <path d="M200 280 Q256 265 312 280 Q325 380 256 410 Q187 380 200 280" fill="url(#skinGrad)" opacity="0.95"/>
+        <!-- Enhanced bust -->
+        <ellipse cx="230" cy="305" rx="32" ry="28" fill="#D2691E" opacity="0.35"/>
+        <ellipse cx="282" cy="305" rx="32" ry="28" fill="#D2691E" opacity="0.35"/>
+        <!-- Cleavage shadow -->
+        <path d="M245 290 Q256 300 267 290" stroke="#D2691E" stroke-width="2" fill="none" opacity="0.4"/>
+        <!-- Waist curve -->
+        <ellipse cx="256" cy="350" rx="40" ry="18" fill="#F4A460" opacity="0.9"/>
+        <!-- Hip curve -->
+        <ellipse cx="256" cy="385" rx="55" ry="25" fill="#F4A460" opacity="0.8"/>
+        <!-- Sensual highlighting -->
+        <ellipse cx="215" cy="320" rx="8" ry="20" fill="#48CCCC" opacity="0.2"/>
+        <ellipse cx="297" cy="320" rx="8" ry="20" fill="#48CCCC" opacity="0.2"/>
+      
+        
+        <!-- Hair -->
+        
+        <!-- Female voluminous flowing hair -->
+        <path d="M150 110 Q256 55 362 110 Q385 180 370 240 Q355 280 335 310 Q315 330 295 340 Q275 320 256 300 Q237 320 217 340 Q197 330 177 310 Q157 280 142 240 Q127 180 150 110" fill="url(#hairGrad)" opacity="0.94"/>
+        <!-- Hair layers and volume -->
+        <path d="M160 130 Q200 120 240 125 Q280 120 320 130 Q340 140 360 155" stroke="#1A0F08" stroke-width="2" fill="none" opacity="0.6"/>
+        <path d="M170 160 Q210 150 250 155 Q290 150 330 160 Q350 170 365 185" stroke="#2A1F18" stroke-width="1.8" fill="none" opacity="0.5"/>
+        <path d="M175 190 Q215 180 255 185 Q295 180 335 190 Q355 200 370 215" stroke="#0A0A0A" stroke-width="1.5" fill="none" opacity="0.4"/>
+        <!-- Flowing strands -->
+        <path d="M180 220 Q200 210 220 220 Q240 210 260 220 Q280 210 300 220 Q320 210 340 220" stroke="#0A0A0A" stroke-width="1.2" fill="none" opacity="0.35"/>
+        <path d="M185 250 Q205 240 225 250 Q245 240 265 250 Q285 240 305 250 Q325 240 345 250" stroke="#1A0F08" stroke-width="1" fill="none" opacity="0.3"/>
+        <!-- Hair highlights -->
+        <path d="M200 140 Q230 135 260 140" stroke="#4A3F38" stroke-width="1" fill="none" opacity="0.4"/>
+        <path d="M190 170 Q220 165 250 170" stroke="#4A3F38" stroke-width="1" fill="none" opacity="0.3"/>
+      
+        
+        <!-- Face -->
+        
+      <!-- Face shape -->
+      <ellipse cx="256" cy="170" rx="65" ry="75" fill="url(#skinGrad)" opacity="0.98"/>
+      
+      <!-- Enhanced eyes with sultry look -->
+      <ellipse cx="235" cy="155" rx="15" ry="10" fill="white" opacity="0.9"/>
+      <ellipse cx="277" cy="155" rx="15" ry="10" fill="white" opacity="0.9"/>
+      <ellipse cx="235" cy="155" rx="12" ry="8" fill="#48CCCC" opacity="0.9"/>
+      <ellipse cx="277" cy="155" rx="12" ry="8" fill="#48CCCC" opacity="0.9"/>
+      <circle cx="235" cy="155" r="7" fill="url(#eyeGrad)"/>
+      <circle cx="277" cy="155" r="7" fill="url(#eyeGrad)"/>
+      <circle cx="237" cy="153" r="2.5" fill="white" opacity="0.9"/>
+      <circle cx="279" cy="153" r="2.5" fill="white" opacity="0.9"/>
+      
+      <!-- Dramatic eyelashes -->
+      <path d="M220 147 Q230 143 240 145 Q245 144 250 147" stroke="#000" stroke-width="2" fill="none" opacity="0.8"/>
+      <path d="M262 147 Q267 144 272 145 Q282 143 292 147" stroke="#000" stroke-width="2" fill="none" opacity="0.8"/>
+      
+      <!-- Seductive eyebrows -->
+      <path d="M218 137 Q235 133 252 137" stroke="#2A2A2A" stroke-width="3" fill="none" opacity="0.9"/>
+      <path d="M260 137 Q277 133 294 137" stroke="#2A2A2A" stroke-width="3" fill="none" opacity="0.9"/>
+      
+      <!-- Eye makeup/shadow -->
+      <ellipse cx="235" cy="150" rx="18" ry="8" fill="#FFA500" opacity="0.3"/>
+      <ellipse cx="277" cy="150" rx="18" ry="8" fill="#FFA500" opacity="0.3"/>
+      
+      <!-- Refined nose -->
+      <ellipse cx="256" cy="178" rx="4" ry="8" fill="#F4A460" opacity="0.6"/>
+      <path d="M252 182 Q256 185 260 182" stroke="#F4A460" stroke-width="1" fill="none" opacity="0.4"/>
+      
+      <!-- Full, sensual lips -->
+      <ellipse cx="256" cy="190" rx="18" ry="7" fill="#D85570" opacity="0.9"/>
+      <ellipse cx="256" cy="189" rx="16" ry="5" fill="#E86580" opacity="0.8"/>
+      <path d="M238 190 Q256 195 274 190" stroke="#C44560" stroke-width="1.5" fill="none" opacity="0.7"/>
+      <ellipse cx="256" cy="188" rx="8" ry="2" fill="white" opacity="0.4"/>
+      
+      <!-- Enhanced cheekbones -->
+      <ellipse cx="215" cy="175" rx="12" ry="20" fill="#FFA500" opacity="0.25"/>
+      <ellipse cx="297" cy="175" rx="12" ry="20" fill="#FFA500" opacity="0.25"/>
+      
+      <!-- Jawline definition -->
+      <path d="M200 200 Q256 215 312 200" stroke="#FFA500" stroke-width="1" fill="none" opacity="0.3"/>
+    
+        
+        <!-- Mystical elements -->
+        
+      <!-- Dramatic mystical orbs -->
+      <circle cx="120" cy="380" r="12" fill="#FFA500" opacity="0.7">
+        <animate attributeName="opacity" values="0.7;1;0.7" dur="3s" repeatCount="indefinite"/>
+        <animate attributeName="r" values="12;15;12" dur="3s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="392" cy="380" r="12" fill="#48CCCC" opacity="0.7">
+        <animate attributeName="opacity" values="0.7;1;0.7" dur="2.5s" repeatCount="indefinite"/>
+        <animate attributeName="r" values="12;15;12" dur="2.5s" repeatCount="indefinite"/>
+      </circle>
+      
+      <!-- Energy swirls -->
+      <path d="M100 360 Q130 340 160 360 Q190 380 220 360" stroke="#FFA500" stroke-width="2" fill="none" opacity="0.5">
+        <animate attributeName="opacity" values="0.5;0.8;0.5" dur="4s" repeatCount="indefinite"/>
+      </path>
+      <path d="M412 360 Q382 340 352 360 Q322 380 292 360" stroke="#48CCCC" stroke-width="2" fill="none" opacity="0.5">
+        <animate attributeName="opacity" values="0.5;0.8;0.5" dur="3.5s" repeatCount="indefinite"/>
+      </path>
+      
+      <!-- Floating energy particles -->
+      <g opacity="0.6">
+        <circle cx="160" cy="320" r="3" fill="#FFA500">
+          <animate attributeName="cy" values="320;300;320" dur="4s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.6;1;0.6" dur="4s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="352" cy="340" r="3" fill="#48CCCC">
+          <animate attributeName="cy" values="340;320;340" dur="3.5s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.6;1;0.6" dur="3.5s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="180" cy="450" r="2.5" fill="#FFA500">
+          <animate attributeName="cy" values="450;430;450" dur="5s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="332" cy="470" r="2.5" fill="#48CCCC">
+          <animate attributeName="cy" values="470;450;470" dur="4.5s" repeatCount="indefinite"/>
+        </circle>
+      </g>
+      
+      <!-- Dramatic corner ornaments -->
+      <g opacity="0.6" fill="#FFA500">
+        <path d="M40 40 Q60 50 80 40 Q60 60 40 80 Q50 60 40 40"/>
+        <path d="M472 40 Q452 50 432 40 Q452 60 472 80 Q462 60 472 40"/>
+        <path d="M40 472 Q60 462 80 472 Q60 452 40 432 Q50 452 40 472"/>
+        <path d="M472 472 Q452 462 432 472 Q452 452 472 432 Q462 452 472 472"/>
+      </g>
+    
+        
+        <!-- Header text with dramatic styling -->
+        <text x="256" y="45" text-anchor="middle" font-family="serif" font-size="32" font-weight="bold" fill="#FFA500" stroke="#2E0854" stroke-width="1">
+          Mystic Fortune
+        </text>
+        <!-- Text shadow effect -->
+        <text x="258" y="47" text-anchor="middle" font-family="serif" font-size="32" font-weight="bold" fill="#2E0854" opacity="0.4">
+          Mystic Fortune
+        </text>
+        
+        <!-- Zodiac/mystical symbols -->
+        
+      <circle cx="80" cy="150" r="20" fill="#FFA500" opacity="0.3"/>
+      <text x="80" y="156" text-anchor="middle" font-family="serif" font-size="20" fill="#FFA500" opacity="0.8">
+        ♈
+      </text>
+    
+      <circle cx="432" cy="150" r="20" fill="#FFA500" opacity="0.3"/>
+      <text x="432" y="156" text-anchor="middle" font-family="serif" font-size="20" fill="#FFA500" opacity="0.8">
+        ♋
+      </text>
+    
+      <circle cx="80" cy="300" r="20" fill="#FFA500" opacity="0.3"/>
+      <text x="80" y="306" text-anchor="middle" font-family="serif" font-size="20" fill="#FFA500" opacity="0.8">
+        ♎
+      </text>
+    
+      <circle cx="432" cy="300" r="20" fill="#FFA500" opacity="0.3"/>
+      <text x="432" y="306" text-anchor="middle" font-family="serif" font-size="20" fill="#FFA500" opacity="0.8">
+        ♑
+      </text>
+    
+      </svg>
+    
