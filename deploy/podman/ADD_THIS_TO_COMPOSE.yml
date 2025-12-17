@@ -1,0 +1,124 @@
+# MysticFortune Service Definition for dp1 VM
+# Copy this to /home/cira/docker-compose.yml on the server
+
+services:
+  site-mysticfortune:
+    build:
+      context: /home/cira/MysticFortune
+      dockerfile: Dockerfile
+    image: mysticfortune:latest
+    container_name: site-mysticfortune
+    restart: unless-stopped
+    
+    environment:
+      # Database
+      - DATABASE_URL=${DATABASE_URL:-postgresql://mysticfortune:password@dp1-db01:5432/mysticfortune}
+      
+      # Session
+      - SESSION_SECRET=${SESSION_SECRET}
+      
+      # Application
+      - NODE_ENV=production
+      - PORT=5000
+      - APP_URL=${APP_URL:-https://mysticfortune.yourdomain.com}
+      
+      # SMTP Configuration (using email-server on dp1)
+      - SMTP_HOST=localhost
+      - SMTP_PORT=587
+      - SMTP_SECURE=false
+      - SMTP_USER=${SMTP_USER:-noreply@yourdomain.com}
+      - SMTP_PASS=${SMTP_PASS}
+      - EMAIL_FROM=Mystic Fortune <noreply@yourdomain.com>
+      
+      # AI Features (optional)
+      - HUGGINGFACE_API_KEY=${HUGGINGFACE_API_KEY}
+      
+      # Payments (optional)
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY}
+      
+      # Virtual Host for nginx-proxy
+      - VIRTUAL_HOST=${VIRTUAL_HOST:-mysticfortune.yourdomain.com}
+      - VIRTUAL_PORT=5000
+      - LETSENCRYPT_HOST=${LETSENCRYPT_HOST:-mysticfortune.yourdomain.com}
+      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL:-admin@yourdomain.com}
+    
+    volumes:
+      - mysticfortune-uploads:/app/uploads
+      - mysticfortune-cache:/app/.cache
+    
+    depends_on:
+      - dp1-db01
+      - nginx-proxy
+    
+    networks:
+      - default
+    
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  # Development version
+  site-mysticfortune-dev:
+    build:
+      context: /home/cira/MysticFortune
+      dockerfile: Dockerfile
+    image: mysticfortune:dev
+    container_name: site-mysticfortune-dev
+    restart: unless-stopped
+    
+    environment:
+      # Database (separate dev database)
+      - DATABASE_URL=${DATABASE_URL_DEV:-postgresql://mysticfortune:password@dp1-db01:5432/mysticfortune_dev}
+      
+      # Session
+      - SESSION_SECRET=${SESSION_SECRET}
+      
+      # Application
+      - NODE_ENV=development
+      - PORT=5000
+      - APP_URL=https://dev.mysticfortune.yourdomain.com
+      - DEBUG=true
+      
+      # SMTP Configuration
+      - SMTP_HOST=localhost
+      - SMTP_PORT=587
+      - SMTP_SECURE=false
+      - SMTP_USER=${SMTP_USER:-noreply@yourdomain.com}
+      - SMTP_PASS=${SMTP_PASS}
+      - EMAIL_FROM=Mystic Fortune Dev <noreply@yourdomain.com>
+      
+      # AI Features (optional, can use test keys)
+      - HUGGINGFACE_API_KEY=${HUGGINGFACE_API_KEY}
+      
+      # Payments (use test keys)
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY_TEST}
+      - STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY_TEST}
+      
+      # Virtual Host for nginx-proxy
+      - VIRTUAL_HOST=dev.mysticfortune.yourdomain.com
+      - VIRTUAL_PORT=5000
+      - LETSENCRYPT_HOST=dev.mysticfortune.yourdomain.com
+      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL:-admin@yourdomain.com}
+    
+    volumes:
+      - mysticfortune-dev-uploads:/app/uploads
+      - mysticfortune-dev-cache:/app/.cache
+      # Optional: Mount source for development hot-reload
+      # - /home/cira/MysticFortune:/app
+    
+    depends_on:
+      - dp1-db01
+      - nginx-proxy
+    
+    networks:
+      - default
+
+volumes:
+  mysticfortune-uploads:
+    driver: local
+  mysticfortune-cache:
+    driver: local
+  mysticfortune-dev-uploads:
+    driver: local
+  mysticfortune-dev-cache:
+    driver: local
