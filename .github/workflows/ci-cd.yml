@@ -1,43 +1,31 @@
-name: Deploy to fortunetellertarot.cards
+name: CI/CD Pipeline for fortunetellertarot.cards-MysticFortune
 
 on:
   push:
     branches:
       - main
-<<<<<<< HEAD
-  workflow_dispatch:
-=======
       - dev
   pull_request:
     branches:
       - main
       - dev
->>>>>>> d30baf00b27c6ef753223b5c8cbe5c33f6914659
 
 jobs:
-  deploy-production:
-    name: Deploy to Production (fortunetellertarot.cards)
+  build-and-deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
 
-      - name: Configure SSH
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.DP1_SSH_PRIVATE_KEY }}
+    - name: Install dependencies
+      run: npm install
 
-<<<<<<< HEAD
-      - name: Add server to known_hosts
-        run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
-          chmod 600 ~/.ssh/known_hosts
-=======
     - name: Set deployment variables
       id: vars
       run: |
@@ -59,74 +47,13 @@ jobs:
       uses: webfactory/ssh-agent@v0.9.0
       with:
         ssh-private-key: ${{ secrets.DP1_SERVER_SSH_KEY }}
->>>>>>> d30baf00b27c6ef753223b5c8cbe5c33f6914659
 
-      - name: Deploy to server
-        env:
-          SERVER_IP: ${{ secrets.SERVER_IP }}
-          SERVER_USER: ${{ secrets.SERVER_USER }}
-          VIRTUAL_HOST: fortunetellertarot.cards
-          LETSENCRYPT_HOST: fortunetellertarot.cards
-          LETSENCRYPT_EMAIL: ${{ secrets.LETSENCRYPT_EMAIL }}
-        run: |
-          echo "🚀 Deploying MysticFortune to fortunetellertarot.cards..."
-          
-          # Copy files to server
-          ssh ${SERVER_USER}@${SERVER_IP} "mkdir -p /home/${SERVER_USER}/mysticfortune-prod"
-          rsync -avz --exclude 'node_modules' --exclude '.git' ./ ${SERVER_USER}@${SERVER_IP}:/home/${SERVER_USER}/mysticfortune-prod/
-          
-          # Build and deploy with Docker
-          ssh ${SERVER_USER}@${SERVER_IP} << 'EOF'
-            cd /home/${SERVER_USER}/mysticfortune-prod
-            
-            # Build Docker image
-            docker build -t mysticfortune:latest .
-            
-            # Stop and remove old container
-            docker stop mysticfortune-prod || true
-            docker rm mysticfortune-prod || true
-            
-            # Run new container with nginx-proxy support
-            docker run -d \
-              --name mysticfortune-prod \
-              --restart unless-stopped \
-              --network nginx-proxy \
-              -e VIRTUAL_HOST=fortunetellertarot.cards \
-              -e LETSENCRYPT_HOST=fortunetellertarot.cards \
-              -e LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL} \
-              -e NODE_ENV=production \
-              --env-file /home/${SERVER_USER}/mysticfortune-prod/.env \
-              mysticfortune:latest
-            
-            # Cleanup old images
-            docker image prune -f
-            
-            echo "✅ Production deployment complete!"
-          EOF
+    - name: Add DP1 to known_hosts
+      run: |
+        mkdir -p ~/.ssh
+        ssh-keyscan -H 74.208.227.161 >> ~/.ssh/known_hosts
+        chmod 600 ~/.ssh/known_hosts
 
-<<<<<<< HEAD
-      - name: Verify deployment
-        run: |
-          echo "Waiting for application to start..."
-          sleep 15
-          
-          # Check if the site is accessible
-          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://fortunetellertarot.cards)
-          if [ $HTTP_STATUS -eq 200 ] || [ $HTTP_STATUS -eq 301 ] || [ $HTTP_STATUS -eq 302 ]; then
-            echo "✅ Site is accessible (HTTP $HTTP_STATUS)"
-          else
-            echo "❌ Site returned HTTP $HTTP_STATUS"
-            exit 1
-          fi
-
-      - name: Notify on success
-        if: success()
-        run: echo "✅ Successfully deployed to fortunetellertarot.cards!"
-
-      - name: Notify on failure
-        if: failure()
-        run: echo "❌ Deployment to fortunetellertarot.cards failed!"
-=======
     - name: Build and Deploy Application on DP1
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -152,4 +79,3 @@ jobs:
             -e NODE_ENV=${DEPLOY_ENV} \
             --env-file .env \
             mysticfortune:${IMAGE_TAG}"
->>>>>>> d30baf00b27c6ef753223b5c8cbe5c33f6914659
