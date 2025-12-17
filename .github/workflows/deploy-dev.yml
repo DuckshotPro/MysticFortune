@@ -1,77 +1,96 @@
-name: Deploy to Development Server
+name: Deploy to Development
 
 on:
   push:
     branches:
       - dev
       - develop
-  workflow_dispatch:  # Allows manual triggering
+  workflow_dispatch:
 
 jobs:
-  deploy:
-    name: Deploy to dev.website.com
+  deploy-development:
+    name: Deploy to Development (dev.fortunetellertarot.cards)
     runs-on: ubuntu-latest
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Configure SSH
+        uses: webfactory/ssh-agent@v0.9.0
         with:
-          node-version: '18'
-          cache: 'npm'
+          ssh-private-key: ${{ secrets.DP1_SSH_PRIVATE_KEY }}
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Add server to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
 
-      - name: Run TypeScript checks
-        run: npm run check
-
-      - name: Build application
-        run: npm run build
+      - name: Deploy to server
         env:
-          NODE_ENV: production
-
-      - name: Deploy to server via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.DEV_SERVER_HOST }}
-          username: ${{ secrets.DEV_SERVER_USER }}
-          key: ${{ secrets.DEV_SERVER_SSH_KEY }}
-          port: ${{ secrets.DEV_SERVER_PORT || 22 }}
-          script: |
-            # Navigate to application directory
-            cd /var/www/dev.website.com || exit 1
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          VIRTUAL_HOST: dev.fortunetellertarot.cards
+          LETSENCRYPT_HOST: dev.fortunetellertarot.cards
+          LETSENCRYPT_EMAIL: ${{ secrets.LETSENCRYPT_EMAIL }}
+        run: |
+          echo "🚀 Deploying MysticFortune to dev.fortunetellertarot.cards..."
+          
+          # Copy files to server
+          ssh ${SERVER_USER}@${SERVER_IP} "mkdir -p /home/${SERVER_USER}/mysticfortune-dev"
+          rsync -avz --exclude 'node_modules' --exclude '.git' ./ ${SERVER_USER}@${SERVER_IP}:/home/${SERVER_USER}/mysticfortune-dev/
+          
+          # Build and deploy with Docker
+          ssh ${SERVER_USER}@${SERVER_IP} << 'EOF'
+            cd /home/${SERVER_USER}/mysticfortune-dev
             
-            # Pull latest changes
-            git pull origin dev
+            # Build Docker image
+            docker build -t mysticfortune:dev .
             
-            # Install dependencies
-            npm ci --production=false
+            # Stop and remove old container
+            docker stop mysticfortune-dev || true
+            docker rm mysticfortune-dev || true
             
-            # Run database migrations
-            npm run db:push
+            # Run new container with nginx-proxy support
+            docker run -d \
+              --name mysticfortune-dev \
+              --restart unless-stopped \
+              --network nginx-proxy \
+              -e VIRTUAL_HOST=dev.fortunetellertarot.cards \
+              -e LETSENCRYPT_HOST=dev.fortunetellertarot.cards \
+              -e LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL} \
+              -e NODE_ENV=development \
+              --env-file /home/${SERVER_USER}/mysticfortune-dev/.env \
+              mysticfortune:dev
             
-            # Build application
-            npm run build
+            # Cleanup old images
+            docker image prune -f
             
-            # Restart application (using PM2)
-            pm2 restart mysticfortune-dev || pm2 start dist/index.js --name mysticfortune-dev
-            
-            # Save PM2 configuration
-            pm2 save
+            echo "✅ Development deployment complete!"
+          EOF
 
       - name: Verify deployment
         run: |
           echo "Waiting for application to start..."
-          sleep 10
-          curl -f https://dev.website.com/api/health || exit 1
+          sleep 15
+          
+          # Check if the site is accessible
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://dev.fortunetellertarot.cards)
+          if [ $HTTP_STATUS -eq 200 ] || [ $HTTP_STATUS -eq 301 ] || [ $HTTP_STATUS -eq 302 ]; then
+            echo "✅ Site is accessible (HTTP $HTTP_STATUS)"
+          else
+            echo "❌ Site returned HTTP $HTTP_STATUS"
+            exit 1
+          fi
 
       - name: Notify on success
         if: success()
-        run: echo "✅ Deployment to dev.website.com successful!"
+        run: echo "✅ Successfully deployed to dev.fortunetellertarot.cards!"
 
       - name: Notify on failure
         if: failure()
-        run: echo "❌ Deployment to dev.website.com failed!"
+        run: echo "❌ Deployment to dev.fortunetellertarot.cards failed!"
