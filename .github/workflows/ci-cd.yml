@@ -1,18 +1,10 @@
-name: Deploy to fortunetellertarot.cards
+name: Deploy to Production
 
 on:
   push:
     branches:
       - main
-<<<<<<< HEAD
   workflow_dispatch:
-=======
-      - dev
-  pull_request:
-    branches:
-      - main
-      - dev
->>>>>>> d30baf00b27c6ef753223b5c8cbe5c33f6914659
 
 jobs:
   deploy-production:
@@ -23,97 +15,59 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run build
+        run: npm run build
+        env:
+          NODE_ENV: production
 
       - name: Configure SSH
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.DP1_SSH_PRIVATE_KEY }}
 
-<<<<<<< HEAD
-      - name: Add server to known_hosts
+      - name: Add DP1 to known_hosts
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H 74.208.227.161 >> ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
-=======
-    - name: Set deployment variables
-      id: vars
-      run: |
-        if [[ $GITHUB_REF == 'refs/heads/main' ]]; then
-          echo "deploy_env=production" >> $GITHUB_OUTPUT
-          echo "container_name=mysticfortune" >> $GITHUB_OUTPUT
-          echo "virtual_host=fortunetellertarot.cards,www.fortunetellertarot.cards" >> $GITHUB_OUTPUT
-          echo "image_tag=latest" >> $GITHUB_OUTPUT
-          echo "branch=main" >> $GITHUB_OUTPUT
-        else
-          echo "deploy_env=development" >> $GITHUB_OUTPUT
-          echo "container_name=mysticfortune-dev" >> $GITHUB_OUTPUT
-          echo "virtual_host=dev.fortunetellertarot.cards" >> $GITHUB_OUTPUT
-          echo "image_tag=dev" >> $GITHUB_OUTPUT
-          echo "branch=dev" >> $GITHUB_OUTPUT
-        fi
 
-    - name: Configure SSH for DP1 Deployment
-      uses: webfactory/ssh-agent@v0.9.0
-      with:
-        ssh-private-key: ${{ secrets.DP1_SERVER_SSH_KEY }}
->>>>>>> d30baf00b27c6ef753223b5c8cbe5c33f6914659
-
-      - name: Deploy to server
-        env:
-          SERVER_IP: ${{ secrets.SERVER_IP }}
-          SERVER_USER: ${{ secrets.SERVER_USER }}
-          VIRTUAL_HOST: fortunetellertarot.cards
-          LETSENCRYPT_HOST: fortunetellertarot.cards
-          LETSENCRYPT_EMAIL: ${{ secrets.LETSENCRYPT_EMAIL }}
+      - name: Deploy to Production
         run: |
-          echo "🚀 Deploying MysticFortune to fortunetellertarot.cards..."
-          
-          # Copy files to server
-          ssh ${SERVER_USER}@${SERVER_IP} "mkdir -p /home/${SERVER_USER}/mysticfortune-prod"
-          rsync -avz --exclude 'node_modules' --exclude '.git' ./ ${SERVER_USER}@${SERVER_IP}:/home/${SERVER_USER}/mysticfortune-prod/
-          
-          # Build and deploy with Docker
-          ssh ${SERVER_USER}@${SERVER_IP} << 'EOF'
-            cd /home/${SERVER_USER}/mysticfortune-prod
-            
-            # Build Docker image
-            docker build -t mysticfortune:latest .
-            
-            # Stop and remove old container
-            docker stop mysticfortune-prod || true
-            docker rm mysticfortune-prod || true
-            
-            # Run new container with nginx-proxy support
-            docker run -d \
-              --name mysticfortune-prod \
-              --restart unless-stopped \
-              --network nginx-proxy \
-              -e VIRTUAL_HOST=fortunetellertarot.cards \
-              -e LETSENCRYPT_HOST=fortunetellertarot.cards \
-              -e LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL} \
+          echo "🚀 Deploying to fortunetellertarot.cards..."
+          ssh cira@74.208.227.161 "cd /home/cira/fortunetellertarot.cards-MysticFortune && \
+            git fetch origin main && \
+            git checkout main && \
+            git pull origin main && \
+            npm install --production && \
+            podman build -t mysticfortune:latest -f Dockerfile . && \
+            podman stop mysticfortune || true && \
+            podman rm mysticfortune || true && \
+            podman run -d --name mysticfortune \
+              --network web-net \
+              -e VIRTUAL_HOST='fortunetellertarot.cards,www.fortunetellertarot.cards' \
+              -e LETSENCRYPT_HOST='fortunetellertarot.cards,www.fortunetellertarot.cards' \
+              -e VIRTUAL_PORT=3000 \
               -e NODE_ENV=production \
-              --env-file /home/${SERVER_USER}/mysticfortune-prod/.env \
-              mysticfortune:latest
-            
-            # Cleanup old images
-            docker image prune -f
-            
-            echo "✅ Production deployment complete!"
-          EOF
+              --env-file .env \
+              --restart unless-stopped \
+              mysticfortune:latest"
 
-<<<<<<< HEAD
       - name: Verify deployment
         run: |
-          echo "Waiting for application to start..."
+          echo "⏳ Waiting for application to start..."
           sleep 15
-          
-          # Check if the site is accessible
-          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://fortunetellertarot.cards)
+          HTTP_STATUS=$(curl -s -o /dev/null -w '%{http_code}' https://fortunetellertarot.cards || echo '0')
           if [ $HTTP_STATUS -eq 200 ] || [ $HTTP_STATUS -eq 301 ] || [ $HTTP_STATUS -eq 302 ]; then
-            echo "✅ Site is accessible (HTTP $HTTP_STATUS)"
+            echo "✅ Production site is accessible (HTTP $HTTP_STATUS)"
           else
             echo "❌ Site returned HTTP $HTTP_STATUS"
             exit 1
@@ -126,31 +80,3 @@ jobs:
       - name: Notify on failure
         if: failure()
         run: echo "❌ Deployment to fortunetellertarot.cards failed!"
-=======
-    - name: Build and Deploy Application on DP1
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        CONTAINER_NAME: ${{ steps.vars.outputs.container_name }}
-        VIRTUAL_HOST: ${{ steps.vars.outputs.virtual_host }}
-        IMAGE_TAG: ${{ steps.vars.outputs.image_tag }}
-        DEPLOY_ENV: ${{ steps.vars.outputs.deploy_env }}
-        BRANCH: ${{ steps.vars.outputs.branch }}
-      run: |
-        echo "Deploying branch '${BRANCH}' to ${CONTAINER_NAME}..."
-        ssh cira@74.208.227.161 "cd /home/cira/fortunetellertarot.cards-MysticFortune && \
-          git fetch origin ${BRANCH} && \
-          git checkout ${BRANCH} && \
-          git pull origin ${BRANCH} && \
-          podman build -t mysticfortune:${IMAGE_TAG} -f Dockerfile . && \
-          podman stop ${CONTAINER_NAME} || true && \
-          podman rm ${CONTAINER_NAME} || true && \
-          podman run -d --name ${CONTAINER_NAME} \
-            --network web-net \
-            -e VIRTUAL_HOST='${VIRTUAL_HOST}' \
-            -e LETSENCRYPT_HOST='${VIRTUAL_HOST}' \
-            -e LETSENCRYPT_EMAIL='support@crypt-ai-lytics.com' \
-            -e VIRTUAL_PORT=3000 \
-            -e NODE_ENV=${DEPLOY_ENV} \
-            --env-file .env \
-            mysticfortune:${IMAGE_TAG}"
->>>>>>> d30baf00b27c6ef753223b5c8cbe5c33f6914659
