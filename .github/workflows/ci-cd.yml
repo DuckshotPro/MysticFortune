@@ -145,6 +145,7 @@ jobs:
           podman stop ${CONTAINER_NAME} || true && \
           podman rm ${CONTAINER_NAME} || true && \
           podman run -d --name ${CONTAINER_NAME} \
+            --network web-net \
             -e VIRTUAL_HOST='${VIRTUAL_HOST}' \
             -e LETSENCRYPT_HOST='${VIRTUAL_HOST}' \
             -e LETSENCRYPT_EMAIL='support@crypt-ai-lytics.com' \
