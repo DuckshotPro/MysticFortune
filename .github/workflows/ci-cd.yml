@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - main
+      - dev
   pull_request:
     branches:
       - main
+      - dev
 
 jobs:
   build-and-deploy:
@@ -24,10 +26,27 @@ jobs:
     - name: Install dependencies
       run: npm install
 
+    - name: Set deployment variables
+      id: vars
+      run: |
+        if [[ $GITHUB_REF == 'refs/heads/main' ]]; then
+          echo "deploy_env=production" >> $GITHUB_OUTPUT
+          echo "container_name=mysticfortune" >> $GITHUB_OUTPUT
+          echo "virtual_host=fortunetellertarot.cards,www.fortunetellertarot.cards" >> $GITHUB_OUTPUT
+          echo "image_tag=latest" >> $GITHUB_OUTPUT
+          echo "branch=main" >> $GITHUB_OUTPUT
+        else
+          echo "deploy_env=development" >> $GITHUB_OUTPUT
+          echo "container_name=mysticfortune-dev" >> $GITHUB_OUTPUT
+          echo "virtual_host=dev.fortunetellertarot.cards" >> $GITHUB_OUTPUT
+          echo "image_tag=dev" >> $GITHUB_OUTPUT
+          echo "branch=dev" >> $GITHUB_OUTPUT
+        fi
+
     - name: Configure SSH for DP1 Deployment
       uses: webfactory/ssh-agent@v0.9.0
       with:
-        ssh-private-key: ${{ secrets.DP1_SSH_PRIVATE_KEY }}
+        ssh-private-key: ${{ secrets.DP1_SERVER_SSH_KEY }}
 
     - name: Add DP1 to known_hosts
       run: |
@@ -38,10 +57,25 @@ jobs:
     - name: Build and Deploy Application on DP1
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        CONTAINER_NAME: ${{ steps.vars.outputs.container_name }}
+        VIRTUAL_HOST: ${{ steps.vars.outputs.virtual_host }}
+        IMAGE_TAG: ${{ steps.vars.outputs.image_tag }}
+        DEPLOY_ENV: ${{ steps.vars.outputs.deploy_env }}
+        BRANCH: ${{ steps.vars.outputs.branch }}
       run: |
-        echo "Building and deploying fortunetellertarot.cards-MysticFortune on DP1..."
+        echo "Deploying branch '${BRANCH}' to ${CONTAINER_NAME}..."
         ssh cira@74.208.227.161 "cd /home/cira/fortunetellertarot.cards-MysticFortune && \
-          podman build -t mysticfortune:latest -f Dockerfile . && \
-          podman stop mysticfortune || true && \
-          podman rm mysticfortune || true && \
-          podman run -d --name mysticfortune -p 80:3000 mysticfortune:latest"
+          git fetch origin ${BRANCH} && \
+          git checkout ${BRANCH} && \
+          git pull origin ${BRANCH} && \
+          podman build -t mysticfortune:${IMAGE_TAG} -f Dockerfile . && \
+          podman stop ${CONTAINER_NAME} || true && \
+          podman rm ${CONTAINER_NAME} || true && \
+          podman run -d --name ${CONTAINER_NAME} \
+            -e VIRTUAL_HOST='${VIRTUAL_HOST}' \
+            -e LETSENCRYPT_HOST='${VIRTUAL_HOST}' \
+            -e LETSENCRYPT_EMAIL='support@crypt-ai-lytics.com' \
+            -e VIRTUAL_PORT=3000 \
+            -e NODE_ENV=${DEPLOY_ENV} \
+            --env-file .env \
+            mysticfortune:${IMAGE_TAG}"
