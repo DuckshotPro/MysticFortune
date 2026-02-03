@@ -677,6 +677,15 @@ class AIImageService {
           } else {
             // Fallback if data URI is malformed
             imageBuffer = await this.generateImage(prompt);
+            // Update the cache entry to fix the malformed URL
+            const isSVG = imageBuffer.toString().includes('<svg');
+            if (isSVG) {
+              const base64Svg = imageBuffer.toString('base64');
+              const newImageUrl = `data:image/svg+xml;base64,${base64Svg}`;
+              await db.update(aiImageCache)
+                .set({ imageUrl: newImageUrl })
+                .where(eq(aiImageCache.id, cachedImage.id));
+            }
           }
         } else {
           // Handle standard file path
