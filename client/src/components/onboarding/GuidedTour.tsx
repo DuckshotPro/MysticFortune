@@ -147,6 +147,7 @@ export default function GuidedTour({ isActive, onComplete, onSkip }: GuidedTourP
         // allowing the modal to show even if target isn't found
         if (step.position === 'center') {
            setTargetElement(document.body);
+           if (retryInterval) clearInterval(retryInterval);
         }
       }
     };

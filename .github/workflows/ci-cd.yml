@@ -52,13 +52,15 @@ jobs:
         DEPLOY_ENV: ${{ steps.vars.outputs.deploy_env }}
         BRANCH: ${{ steps.vars.outputs.branch }}
       with:
-        host: 74.208.227.161
-        username: cira
+        host: ${{ secrets.DP1_SERVER_HOST }}
+        username: ${{ secrets.DP1_SERVER_USER }}
         key: ${{ secrets.DP1_SERVER_SSH_KEY }}
+        port: ${{ secrets.DP1_SERVER_PORT || 22 }}
         envs: CONTAINER_NAME,VIRTUAL_HOST,IMAGE_TAG,DEPLOY_ENV,BRANCH
         script: |
           echo "Deploying branch '${BRANCH}' to ${CONTAINER_NAME}..."
-          cd /home/cira/fortunetellertarot.cards-MysticFortune || exit 1
+          # Use the home directory of the connection user
+          cd $HOME/fortunetellertarot.cards-MysticFortune || exit 1
 
           # Git operations
           git fetch origin ${BRANCH}
