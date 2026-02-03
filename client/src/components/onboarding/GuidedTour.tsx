@@ -97,43 +97,74 @@ export default function GuidedTour({ isActive, onComplete, onSkip }: GuidedTourP
   useEffect(() => {
     if (!isActive) return;
 
+    let retryCount = 0;
+    const maxRetries = 50; // 5 seconds at 100ms interval
+    let retryInterval: NodeJS.Timeout;
+
     const findTarget = () => {
       const target = document.querySelector(step.targetSelector) as HTMLElement;
-      setTargetElement(target);
       
-      if (target && step.position !== 'center') {
-        const rect = target.getBoundingClientRect();
-        const tooltipOffset = 20;
+      if (target) {
+        setTargetElement(target);
+        // Only clear interval if we successfully found target
+        if (retryInterval) clearInterval(retryInterval);
         
-        let x = rect.left + rect.width / 2;
-        let y = rect.top;
-        
-        switch (step.position) {
-          case 'top':
-            y = rect.top - tooltipOffset;
-            break;
-          case 'bottom':
-            y = rect.bottom + tooltipOffset;
-            break;
-          case 'left':
-            x = rect.left - tooltipOffset;
-            y = rect.top + rect.height / 2;
-            break;
-          case 'right':
-            x = rect.right + tooltipOffset;
-            y = rect.top + rect.height / 2;
-            break;
+        if (step.position !== 'center') {
+          const rect = target.getBoundingClientRect();
+          const tooltipOffset = 20;
+
+          let x = rect.left + rect.width / 2;
+          let y = rect.top;
+
+          switch (step.position) {
+            case 'top':
+              y = rect.top - tooltipOffset;
+              break;
+            case 'bottom':
+              y = rect.bottom + tooltipOffset;
+              break;
+            case 'left':
+              x = rect.left - tooltipOffset;
+              y = rect.top + rect.height / 2;
+              break;
+            case 'right':
+              x = rect.right + tooltipOffset;
+              y = rect.top + rect.height / 2;
+              break;
+          }
+
+          setTooltipPosition({ x, y });
+        }
+      } else {
+        // Increment retry count
+        retryCount++;
+        if (retryCount >= maxRetries && retryInterval) {
+          clearInterval(retryInterval);
+          console.warn(`Tour step target not found: ${step.targetSelector}`);
         }
         
-        setTooltipPosition({ x, y });
+        // If it's a center position step (like welcome), we might not need a specific target
+        // allowing the modal to show even if target isn't found
+        if (step.position === 'center') {
+           setTargetElement(document.body);
+           if (retryInterval) clearInterval(retryInterval);
+        }
       }
     };
 
+    // Initial check
     findTarget();
     
+    // Retry mechanism to handle dynamic loading or layout shifts
+    retryInterval = setInterval(findTarget, 100);
+
     // Re-find target on resize
     window.addEventListener('resize', findTarget);
-    return () => window.removeEventListener('resize', findTarget);
+
+    return () => {
+      window.removeEventListener('resize', findTarget);
+      if (retryInterval) clearInterval(retryInterval);
+    };
   }, [step, isActive]);
 
   useEffect(() => {
