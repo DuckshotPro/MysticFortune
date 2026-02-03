@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, Sparkles, Eye, Zap } from "lucide-react";
 import { Fortune, FortuneCategoryType } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
+import { Typewriter } from "@/components/ui/typewriter"; // Assuming this exists or I'll implement inline
 import { FortuneTellerCharacter, generateCharacterPrompt, selectEmotionForFortune, getCharacterById, getRandomCharacter } from "@/lib/fortuneTellerCharacters";
 
 interface DramaticFortuneRevealProps {
@@ -269,9 +270,34 @@ export default function DramaticFortuneReveal({ characterId, category, onFortune
                       key={buildupText}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
-                      className="space-y-4"
+                      className="space-y-4 relative"
                     >
-                      <p className="text-xl text-purple-300 italic">
+                      {/* Mystical Particles */}
+                      <AnimatePresence>
+                        {phase === 'building' && (
+                          <>
+                            {[...Array(5)].map((_, i) => (
+                              <motion.div
+                                key={i}
+                                initial={{ opacity: 0, y: 0, x: 0 }}
+                                animate={{
+                                  opacity: [0, 1, 0],
+                                  y: -50 - Math.random() * 50,
+                                  x: (Math.random() - 0.5) * 50
+                                }}
+                                transition={{
+                                  duration: 2,
+                                  repeat: Infinity,
+                                  delay: i * 0.4
+                                }}
+                                className="absolute top-1/2 left-1/2 w-2 h-2 bg-amber-400 rounded-full blur-[1px]"
+                              />
+                            ))}
+                          </>
+                        )}
+                      </AnimatePresence>
+
+                      <p className="text-xl text-purple-300 italic min-h-[60px]">
                         "{buildupText}"
                       </p>
                       

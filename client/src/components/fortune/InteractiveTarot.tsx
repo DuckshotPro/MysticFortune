@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar, faMoon, faSun, faHeart, faCoins, faCrown, faWandMagicSparkles, faBolt, faGem } from "@fortawesome/free-solid-svg-icons";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { useSound } from "@/hooks/useSound";
 // Import ethereal character images using the @assets alias for proper bundling
 import etherealFigure1 from "@assets/generated_images/Ethereal_fortune_teller_figure_dd1645ae.png";
 import etherealFigure2 from "@assets/generated_images/Mystical_tarot_reader_portrait_1cd6954d.png";
@@ -39,17 +40,20 @@ export default function InteractiveTarot() {
   const [isShuffling, setIsShuffling] = useState(false);
   const [spreadType, setSpreadType] = useState<"single" | "three" | "celtic">("three");
   const { toast } = useToast();
+  const { playSoundEffect } = useSound();
 
   const shuffleDeck = () => {
     setIsShuffling(true);
     setSelectedCards([]);
     setRevealedCards([]);
+    playSoundEffect('energy-pulse'); // Placeholder for shuffle sound if specific one doesn't exist
     
     setTimeout(() => {
       const shuffled = [...tarotDeck].sort(() => Math.random() - 0.5);
       const numCards = spreadType === "single" ? 1 : spreadType === "three" ? 3 : 5;
       setSelectedCards(shuffled.slice(0, numCards).map(card => card.id));
       setIsShuffling(false);
+      playSoundEffect('cosmic-transition');
       
       toast({
         title: "Cards Shuffled",
@@ -60,6 +64,7 @@ export default function InteractiveTarot() {
 
   const revealCard = (cardId: number) => {
     if (!revealedCards.includes(cardId)) {
+      playSoundEffect('mystical-reveal');
       setRevealedCards([...revealedCards, cardId]);
     }
   };
@@ -148,7 +153,8 @@ export default function InteractiveTarot() {
                 spreadType === "single" ? "grid-cols-1 max-w-sm" : 
                 spreadType === "three" ? "grid-cols-1 md:grid-cols-3 max-w-4xl" : 
                 "grid-cols-2 md:grid-cols-3 lg:grid-cols-5 max-w-6xl"
-              } gap-6 mx-auto`}
+              } gap-6 mx-auto perspective-1000`}
+              style={{ perspective: "1000px" }}
             >
               {selectedCards.map((cardId, index) => {
                 const card = tarotDeck.find(c => c.id === cardId)!;
@@ -157,9 +163,14 @@ export default function InteractiveTarot() {
                 return (
                   <motion.div
                     key={cardId}
-                    initial={{ opacity: 0, y: 50 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.2 }}
+                    initial={{ opacity: 0, y: 50, rotateY: 180 }}
+                    animate={{ opacity: 1, y: 0, rotateY: 0 }}
+                    transition={{
+                      delay: index * 0.2,
+                      type: "spring",
+                      stiffness: 100,
+                      damping: 12
+                    }}
                     className="relative"
                   >
                     <div className="text-center mb-2">

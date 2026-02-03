@@ -656,6 +656,27 @@ class AIImageService {
     costSaved: number;
   }> {
     try {
+      // 1. Check for local fallback images first (User Request: "large dir full of cute porple")
+      const localImagesDir = path.join(process.cwd(), "client", "public", "local-images");
+      if (fs.existsSync(localImagesDir)) {
+        const files = fs.readdirSync(localImagesDir).filter(file => /\.(jpg|jpeg|png|webp)$/i.test(file));
+        if (files.length > 0) {
+          // Pick a random local image
+          const randomFile = files[Math.floor(Math.random() * files.length)];
+          const imageUrl = `/local-images/${randomFile}`;
+          const imageBuffer = fs.readFileSync(path.join(localImagesDir, randomFile));
+
+          return {
+            imageBuffer,
+            imageUrl,
+            characterId,
+            emotion,
+            cached: true, // Treat as cached since we didn't generate it
+            costSaved: 0.05, // Estimated value
+          };
+        }
+      }
+
       const promptHash = this.hashPrompt(prompt, characterId, emotion);
       
       // Check cache first for cost optimization
@@ -677,15 +698,6 @@ class AIImageService {
           } else {
             // Fallback if data URI is malformed
             imageBuffer = await this.generateImage(prompt);
-            // Update the cache entry to fix the malformed URL
-            const isSVG = imageBuffer.toString().includes('<svg');
-            if (isSVG) {
-              const base64Svg = imageBuffer.toString('base64');
-              const newImageUrl = `data:image/svg+xml;base64,${base64Svg}`;
-              await db.update(aiImageCache)
-                .set({ imageUrl: newImageUrl })
-                .where(eq(aiImageCache.id, cachedImage.id));
-            }
           }
         } else {
           // Handle standard file path

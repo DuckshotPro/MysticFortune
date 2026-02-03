@@ -25,11 +25,11 @@ function AdBanner({ variant = "footer", showCloseButton = true }: AdBannerProps)
   // Go to AdSense Console -> Ads -> By ad unit -> Create new ad unit
   const AD_SLOTS = {
     // Recommended: "Display ad" -> "Square" or "Vertical"
-    sidebar: import.meta.env.VITE_ADSENSE_SIDEBAR_SLOT || "1234567890",
+    sidebar: "1234567890",
     // Recommended: "Display ad" -> "Horizontal" or "Square"
-    inline: import.meta.env.VITE_ADSENSE_INLINE_SLOT || "1234567891",
+    inline: "1234567891",
     // Recommended: "Display ad" -> "Horizontal"
-    footer: import.meta.env.VITE_ADSENSE_FOOTER_SLOT || "1234567892"
+    footer: "1234567892"
   };
 
   if (variant === "sidebar") {
