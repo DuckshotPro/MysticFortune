@@ -43,34 +43,34 @@ jobs:
           echo "branch=dev" >> $GITHUB_OUTPUT
         fi
 
-    - name: Configure SSH for DP1 Deployment
-      uses: webfactory/ssh-agent@v0.9.0
-      with:
-        ssh-private-key: ${{ secrets.DP1_SERVER_SSH_KEY }}
-
-    - name: Add DP1 to known_hosts
-      run: |
-        mkdir -p ~/.ssh
-        ssh-keyscan -H 74.208.227.161 >> ~/.ssh/known_hosts
-        chmod 600 ~/.ssh/known_hosts
-
-    - name: Build and Deploy Application on DP1
+    - name: Deploy to DP1 via SSH
+      uses: appleboy/ssh-action@v1.0.3
       env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         CONTAINER_NAME: ${{ steps.vars.outputs.container_name }}
         VIRTUAL_HOST: ${{ steps.vars.outputs.virtual_host }}
         IMAGE_TAG: ${{ steps.vars.outputs.image_tag }}
         DEPLOY_ENV: ${{ steps.vars.outputs.deploy_env }}
         BRANCH: ${{ steps.vars.outputs.branch }}
-      run: |
-        echo "Deploying branch '${BRANCH}' to ${CONTAINER_NAME}..."
-        ssh cira@74.208.227.161 "cd /home/cira/fortunetellertarot.cards-MysticFortune && \
-          git fetch origin ${BRANCH} && \
-          git checkout ${BRANCH} && \
-          git pull origin ${BRANCH} && \
-          podman build -t mysticfortune:${IMAGE_TAG} -f Dockerfile . && \
-          podman stop ${CONTAINER_NAME} || true && \
-          podman rm ${CONTAINER_NAME} || true && \
+      with:
+        host: 74.208.227.161
+        username: cira
+        key: ${{ secrets.DP1_SERVER_SSH_KEY }}
+        envs: CONTAINER_NAME,VIRTUAL_HOST,IMAGE_TAG,DEPLOY_ENV,BRANCH
+        script: |
+          echo "Deploying branch '${BRANCH}' to ${CONTAINER_NAME}..."
+          cd /home/cira/fortunetellertarot.cards-MysticFortune || exit 1
+
+          # Git operations
+          git fetch origin ${BRANCH}
+          git checkout ${BRANCH}
+          git pull origin ${BRANCH}
+
+          # Podman operations
+          podman build -t mysticfortune:${IMAGE_TAG} -f Dockerfile .
+          podman stop ${CONTAINER_NAME} || true
+          podman rm ${CONTAINER_NAME} || true
+
+          # Run new container
           podman run -d --name ${CONTAINER_NAME} \
             -e VIRTUAL_HOST='${VIRTUAL_HOST}' \
             -e LETSENCRYPT_HOST='${VIRTUAL_HOST}' \
@@ -78,4 +78,4 @@ jobs:
             -e VIRTUAL_PORT=3000 \
             -e NODE_ENV=${DEPLOY_ENV} \
             --env-file .env \
-            mysticfortune:${IMAGE_TAG}"
+            mysticfortune:${IMAGE_TAG}
