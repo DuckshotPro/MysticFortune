@@ -666,17 +666,31 @@ class AIImageService {
         await this.updateCacheUsage(cachedImage.id);
         await this.trackImageView(cachedImage.id, userId, sessionId, 'character_generation');
         
-        const fullPath = path.join(process.cwd(), "client", "public", cachedImage.imageUrl);
         let imageBuffer: Buffer;
         
-        if (fs.existsSync(fullPath)) {
-          imageBuffer = fs.readFileSync(fullPath);
+        // Handle Data URI (SVG) differently from file paths
+        if (cachedImage.imageUrl.startsWith('data:')) {
+          // Extract base64 content
+          const base64Content = cachedImage.imageUrl.split(',')[1];
+          if (base64Content) {
+            imageBuffer = Buffer.from(base64Content, 'base64');
+          } else {
+            // Fallback if data URI is malformed
+            imageBuffer = await this.generateImage(prompt);
+          }
         } else {
-          // File missing, regenerate but keep cache entry
-          imageBuffer = await this.generateImage(prompt);
-          const filename = cachedImage.imageUrl.split('/').pop() || `${characterId}-${emotion}-${Date.now()}.png`;
-          const filepath = path.join(process.cwd(), "client", "public", "generated-characters", filename);
-          fs.writeFileSync(filepath, imageBuffer);
+          // Handle standard file path
+          const fullPath = path.join(process.cwd(), "client", "public", cachedImage.imageUrl);
+
+          if (fs.existsSync(fullPath)) {
+            imageBuffer = fs.readFileSync(fullPath);
+          } else {
+            // File missing, regenerate but keep cache entry
+            imageBuffer = await this.generateImage(prompt);
+            const filename = cachedImage.imageUrl.split('/').pop() || `${characterId}-${emotion}-${Date.now()}.png`;
+            const filepath = path.join(process.cwd(), "client", "public", "generated-characters", filename);
+            fs.writeFileSync(filepath, imageBuffer);
+          }
         }
         
         return {
