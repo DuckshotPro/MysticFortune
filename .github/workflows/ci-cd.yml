@@ -52,8 +52,8 @@ jobs:
         DEPLOY_ENV: ${{ steps.vars.outputs.deploy_env }}
         BRANCH: ${{ steps.vars.outputs.branch }}
       with:
-        host: ${{ secrets.DP1_SERVER_HOST }}
-        username: ${{ secrets.DP1_SERVER_USER }}
+        host: 74.208.227.161
+        username: cira
         key: ${{ secrets.DP1_SERVER_SSH_KEY }}
         passphrase: ${{ secrets.DP1_SERVER_SSH_PASSPHRASE }}
         port: ${{ secrets.DP1_SERVER_PORT || 22 }}
