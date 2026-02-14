@@ -83,8 +83,14 @@ class PromotionService {
     return [...baseHashtags, ...(categoryHashtags[category] || categoryHashtags.general)];
   }
 
-  async generatePromotionalContent(category?: FortuneCategoryType): Promise<PromotionalContent> {
-    // Get a random fortune for promotion
+  private async generateFullPromotionalAsset(category?: FortuneCategoryType): Promise<{
+    content: PromotionalContent;
+    artwork: {
+      imageBuffer: Buffer;
+      prompt: string;
+      category: FortuneCategoryType;
+    };
+  }> {
     const selectedCategory = category || this.getRandomCategory();
     const fortune = await storage.getRandomFortune(selectedCategory);
     
@@ -100,23 +106,34 @@ class PromotionService {
     const hashtags = this.generateHashtags(selectedCategory);
 
     return {
-      fortuneContent: fortune.content,
-      imagePrompt: artwork.prompt,
-      socialCaptions,
-      hashtags
+      content: {
+        fortuneContent: fortune.content,
+        imagePrompt: artwork.prompt,
+        socialCaptions,
+        hashtags
+      },
+      artwork: {
+        imageBuffer: artwork.imageBuffer,
+        prompt: artwork.prompt,
+        category: selectedCategory
+      }
     };
+  }
+
+  async generatePromotionalContent(category?: FortuneCategoryType): Promise<PromotionalContent> {
+    const { content } = await this.generateFullPromotionalAsset(category);
+    return content;
   }
 
   async createPromotionalAsset(category?: FortuneCategoryType): Promise<{
     imagePath: string;
     content: PromotionalContent;
   }> {
-    const content = await this.generatePromotionalContent(category);
-    const artwork = await aiImageService.generateMysticalArtwork(category || this.getRandomCategory());
+    const { content, artwork } = await this.generateFullPromotionalAsset(category);
     
     // Save image to assets directory
     const timestamp = Date.now();
-    const filename = `promo-${category || 'general'}-${timestamp}.png`;
+    const filename = `promo-${artwork.category || 'general'}-${timestamp}.png`;
     const imagePath = path.join(this.assetsDir, filename);
     
     await fs.writeFile(imagePath, artwork.imageBuffer);
