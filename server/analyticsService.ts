@@ -324,19 +324,37 @@ class AnalyticsService {
       platform: viralMetrics.platform,
       totalShares: sum(viralMetrics.actualShares),
       avgViralScore: avg(viralMetrics.viralScore),
+      hashtags: sql<string[][] | null>`json_agg(${viralMetrics.hashtags})`,
       count: count()
     })
     .from(viralMetrics)
     .groupBy(viralMetrics.platform);
 
-    return platformData.map(data => ({
-      platform: data.platform,
-      totalShares: Number(data.totalShares) || 0,
-      avgViralScore: data.avgViralScore || 0,
-      peakEngagementHour: 18, // TODO: Calculate from actual data
-      topHashtags: [], // TODO: Extract from hashtags array
-      conversionRate: 0 // TODO: Calculate from conversion events
-    }));
+    return platformData.map(data => {
+      // Extract and count hashtags
+      const allHashtags = (data.hashtags || [])
+        .flat()
+        .filter((tag): tag is string => typeof tag === 'string' && tag.length > 0);
+
+      const hashtagCounts = allHashtags.reduce((acc, tag) => {
+        acc[tag] = (acc[tag] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+
+      const topHashtags = Object.entries(hashtagCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(([tag]) => tag);
+
+      return {
+        platform: data.platform,
+        totalShares: Number(data.totalShares) || 0,
+        avgViralScore: Number(data.avgViralScore) || 0,
+        peakEngagementHour: 18, // TODO: Calculate from actual data
+        topHashtags,
+        conversionRate: 0 // TODO: Calculate from conversion events
+      };
+    });
   }
 
   private async getMostActiveHours(startDate: Date): Promise<number[]> {
