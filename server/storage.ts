@@ -6,7 +6,7 @@ import {
   type FortuneCategoryType, type ZodiacSignType
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -79,11 +79,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getRandomFortune(category: FortuneCategoryType): Promise<Fortune | undefined> {
-    const categoryFortunes = await db.select().from(fortunes).where(eq(fortunes.category, category));
-    if (categoryFortunes.length === 0) return undefined;
-    
-    const randomIndex = Math.floor(Math.random() * categoryFortunes.length);
-    return categoryFortunes[randomIndex];
+    const [fortune] = await db
+      .select()
+      .from(fortunes)
+      .where(eq(fortunes.category, category))
+      .orderBy(sql`RANDOM()`)
+      .limit(1);
+    return fortune || undefined;
   }
 
   async createFortune(insertFortune: InsertFortune): Promise<Fortune> {
