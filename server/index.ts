@@ -34,7 +34,23 @@ app.use((req, res, next) => {
     if (path.startsWith("/api")) {
       let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
       if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
+        // Optimized: Only serialize what might fit in the log line
+        // and limit traversal depth/size to avoid performance/memory spikes
+        // on large responses.
+        const remaining = 79 - logLine.length;
+        if (remaining > 0) {
+          let nodes = 0;
+          const maxNodes = 50;
+          const jsonStr = JSON.stringify(capturedJsonResponse, (key, value) => {
+            if (nodes > maxNodes) return undefined;
+            nodes++;
+            if (typeof value === "string" && value.length > 100) {
+              return value.slice(0, 100) + "…";
+            }
+            return value;
+          });
+          logLine += ` :: ${jsonStr}`;
+        }
       }
 
       if (logLine.length > 80) {
