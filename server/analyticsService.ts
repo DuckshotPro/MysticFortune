@@ -245,46 +245,57 @@ class AnalyticsService {
         break;
     }
 
-    // Get session metrics
-    const sessionMetrics = await db.select({
-      totalSessions: count(),
-      avgDuration: avg(userSessions.duration),
-      avgPageViews: avg(userSessions.pageViews)
-    })
-    .from(userSessions)
-    .where(gte(userSessions.startTime, startDate));
+    const [
+      sessionMetrics,
+      categoryMetrics,
+      conversionData,
+      mostActiveHours,
+      retentionRate
+    ] = await Promise.all([
+      // Get session metrics
+      db.select({
+        totalSessions: count(),
+        avgDuration: avg(userSessions.duration),
+        avgPageViews: avg(userSessions.pageViews)
+      })
+      .from(userSessions)
+      .where(gte(userSessions.startTime, startDate)),
 
-    // Get top categories
-    const categoryMetrics = await db.select({
-      category: userInteractions.category,
-      count: count()
-    })
-    .from(userInteractions)
-    .where(and(
-      gte(userInteractions.timestamp, startDate),
-      sql`${userInteractions.category} IS NOT NULL`
-    ))
-    .groupBy(userInteractions.category)
-    .orderBy(desc(count()))
-    .limit(5);
+      // Get top categories
+      db.select({
+        category: userInteractions.category,
+        count: count()
+      })
+      .from(userInteractions)
+      .where(and(
+        gte(userInteractions.timestamp, startDate),
+        sql`${userInteractions.category} IS NOT NULL`
+      ))
+      .groupBy(userInteractions.category)
+      .orderBy(desc(count()))
+      .limit(5),
 
-    // Get conversion rate (users who performed premium actions)
-    const conversionData = await db.select({
-      total: count(),
-      conversions: sum(sql`CASE WHEN ${userSessions.conversionEvent} IS NOT NULL THEN 1 ELSE 0 END`)
-    })
-    .from(userSessions)
-    .where(gte(userSessions.startTime, startDate));
+      // Get conversion rate (users who performed premium actions)
+      db.select({
+        total: count(),
+        conversions: sum(sql`CASE WHEN ${userSessions.conversionEvent} IS NOT NULL THEN 1 ELSE 0 END`)
+      })
+      .from(userSessions)
+      .where(gte(userSessions.startTime, startDate)),
+
+      this.getMostActiveHours(startDate),
+      this.calculateRetentionRate(startDate)
+    ]);
 
     return {
       totalSessions: sessionMetrics[0]?.totalSessions || 0,
       avgSessionDuration: sessionMetrics[0]?.avgDuration || 0,
       avgPageViews: sessionMetrics[0]?.avgPageViews || 0,
-      mostActiveHours: await this.getMostActiveHours(startDate),
+      mostActiveHours,
       topCategories: categoryMetrics.map(c => ({ category: c.category || '', count: c.count })),
       conversionRate: conversionData[0]?.total ? 
         (Number(conversionData[0].conversions) / conversionData[0].total) * 100 : 0,
-      retentionRate: await this.calculateRetentionRate(startDate)
+      retentionRate
     };
   }
 
