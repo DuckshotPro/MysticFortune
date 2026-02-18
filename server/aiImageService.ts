@@ -691,14 +691,18 @@ class AIImageService {
           // Handle standard file path
           const fullPath = path.join(process.cwd(), "client", "public", cachedImage.imageUrl);
 
-          if (fs.existsSync(fullPath)) {
-            imageBuffer = fs.readFileSync(fullPath);
-          } else {
-            // File missing, regenerate but keep cache entry
-            imageBuffer = await this.generateImage(prompt);
-            const filename = cachedImage.imageUrl.split('/').pop() || `${characterId}-${emotion}-${Date.now()}.png`;
-            const filepath = path.join(process.cwd(), "client", "public", "generated-characters", filename);
-            fs.writeFileSync(filepath, imageBuffer);
+          try {
+            imageBuffer = await fs.promises.readFile(fullPath);
+          } catch (error: any) {
+            // File missing or error, regenerate but keep cache entry
+            if (error.code === 'ENOENT') {
+              imageBuffer = await this.generateImage(prompt);
+              const filename = cachedImage.imageUrl.split('/').pop() || `${characterId}-${emotion}-${Date.now()}.png`;
+              const filepath = path.join(process.cwd(), "client", "public", "generated-characters", filename);
+              await fs.promises.writeFile(filepath, imageBuffer);
+            } else {
+              throw error;
+            }
           }
         }
         
@@ -726,15 +730,13 @@ class AIImageService {
       } else {
         // Save image to public directory for serving
         const assetsDir = path.join(process.cwd(), "client", "public", "generated-characters");
-        if (!fs.existsSync(assetsDir)) {
-          fs.mkdirSync(assetsDir, { recursive: true });
-        }
+        await fs.promises.mkdir(assetsDir, { recursive: true });
         
         const timestamp = Date.now();
         const filename = `${characterId}-${emotion}-${timestamp}.png`;
         const filepath = path.join(assetsDir, filename);
         
-        fs.writeFileSync(filepath, imageBuffer);
+        await fs.promises.writeFile(filepath, imageBuffer);
         imageUrl = `/generated-characters/${filename}`;
       }
       
@@ -768,7 +770,7 @@ class AIImageService {
       const filename = `fallback-${characterId}-${emotion}-${Date.now()}.svg`;
       const filepath = path.join(process.cwd(), "client", "public", "generated-characters", filename);
       
-      fs.writeFileSync(filepath, fallbackSVG);
+      await fs.promises.writeFile(filepath, fallbackSVG);
       
       return {
         imageBuffer: fallbackSVG,
