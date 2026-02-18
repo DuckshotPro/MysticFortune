@@ -23,7 +23,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       - name: Run TypeScript checks
         run: npm run check
@@ -59,7 +59,7 @@ jobs:
             
             # Install dependencies
             echo "📦 Installing dependencies..."
-            npm ci --production=false
+            npm ci --production=false --legacy-peer-deps
             
             # Run database migrations (dev database)
             echo "🗄️ Running database migrations..."
