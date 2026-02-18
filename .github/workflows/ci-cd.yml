@@ -54,8 +54,7 @@ jobs:
       with:
         host: ${{ secrets.DP1_SERVER_HOST }}
         username: ${{ secrets.DP1_SERVER_USER }}
-        key: ${{ secrets.DP1_SERVER_SSH_KEY }}
-        passphrase: ${{ secrets.DP1_SERVER_SSH_PASSPHRASE }}
+        key: ${{ secrets.DP1_SSH_PRIVATE_KEY }}
         port: ${{ secrets.DP1_SERVER_PORT || 22 }}
         envs: CONTAINER_NAME,VIRTUAL_HOST,IMAGE_TAG,DEPLOY_ENV,BRANCH
         script: |
