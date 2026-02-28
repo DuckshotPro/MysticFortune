@@ -697,9 +697,7 @@ class AIImageService {
             // File missing or error, regenerate but keep cache entry
             if (error.code === 'ENOENT') {
               imageBuffer = await this.generateImage(prompt);
-              const filename = cachedImage.imageUrl.split('/').pop() || `${characterId}-${emotion}-${Date.now()}.png`;
-              const filepath = path.join(process.cwd(), "client", "public", "generated-characters", filename);
-              await fs.promises.writeFile(filepath, imageBuffer);
+              await fs.promises.writeFile(fullPath, imageBuffer);
             } else {
               throw error;
             }
