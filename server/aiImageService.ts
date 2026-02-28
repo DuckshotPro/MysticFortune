@@ -770,6 +770,7 @@ class AIImageService {
       const filename = `fallback-${characterId}-${emotion}-${Date.now()}.svg`;
       const filepath = path.join(process.cwd(), "client", "public", "generated-characters", filename);
       
+      await fs.promises.mkdir(path.dirname(filepath), { recursive: true });
       await fs.promises.writeFile(filepath, fallbackSVG);
       
       return {
