@@ -42,8 +42,8 @@ app.use((req, res, next) => {
           let nodes = 0;
           const maxNodes = 50;
           const jsonStr = JSON.stringify(capturedJsonResponse, (key, value) => {
-            if (nodes > maxNodes) return undefined;
             nodes++;
+            if (nodes > maxNodes) return undefined;
             if (typeof value === "string" && value.length > 100) {
               return value.slice(0, 100) + "…";
             }
