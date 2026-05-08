@@ -263,11 +263,11 @@ class AchievementService {
       }
     ];
 
-    for (const achievement of defaultAchievements) {
+    if (defaultAchievements.length > 0) {
       try {
-        await db.insert(achievements).values(achievement).onConflictDoNothing();
+        await db.insert(achievements).values(defaultAchievements).onConflictDoNothing();
       } catch (error) {
-        console.log(`Achievement "${achievement.name}" already exists or error occurred`);
+        console.error('Error initializing default achievements:', error);
       }
     }
   }
